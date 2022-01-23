@@ -1,0 +1,13 @@
+geometry_msgs/Pose[] Poses
+int32 GoalBoxIndex # Important only in WorkingMode=0
+int32 WorkingMode
+# Working modes:
+# 0: Grasp, move from start box to goal box (length of Poses > 0);
+# 1: Grasp and move object to a fixed point on a plane to learn (lenth of poses > 0); 
+# 2: Slightly change view in case of low confidence or fail on grasping generating (length of Poses = 1);
+# 3: Change position to point specified in "Poses" field (length of Poses = 1);
+# 4: return to initial state (Poses = [])
+
+---
+bool GraspWorked
+bool AllMotionWorked
