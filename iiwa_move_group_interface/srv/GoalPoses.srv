@@ -1,0 +1,6 @@
+geometry_msgs/Pose[] Poses
+int32 GoalBoxIndex
+int32 WorkingMode
+---
+bool GraspWorked
+bool AllMotionWorked

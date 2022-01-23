@@ -1,0 +1,8 @@
+<launch>
+<arg name="robot_name" default="iiwa"/>
+<group ns="$(arg robot_name)" >
+  <node name="move_group_interface_iiwa" pkg="iiwa_move_group_interface" type="move_group_interface_iiwa" respawn="false" output="screen">
+  </node>
+</group>
+
+</launch>

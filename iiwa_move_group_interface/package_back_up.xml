@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<package>
+  <name>iiwa_move_group_interface</name>
+  <version>0.1.0</version>
+  <description>The iiwa_move_group_interface package</description>
+  <license>BSD</license>
+
+  <author email="abdelrazaq.ja@gmail.com">Sachin Chitta</author>
+
+  <maintainer email="abdelrazaq.ja@gmail.com">Dave Coleman</maintainer>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>pluginlib</build_depend>
+  <build_depend>eigen</build_depend>
+  <build_depend>moveit_core</build_depend>
+  <build_depend>moveit_ros_planning</build_depend>
+  <build_depend>moveit_ros_planning_interface</build_depend>
+  <build_depend>moveit_ros_perception</build_depend>
+  <build_depend>interactive_markers</build_depend>
+  <build_depend>geometric_shapes</build_depend>
+  <build_depend>moveit_visual_tools</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>pcl_conversions</build_depend>
+  <build_depend>rosbag</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>tf2_eigen</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  
+  <build_depend>message_generation</build_depend>
+  
+  <build_depend>iiwa_description</build_depend>
+  <build_depend>moveit_ros_move_group</build_depend>
+  <build_depend>moveit_setup_assistant</build_depend>
+  <build_depend>moveit_planners_ompl</build_depend>
+  <build_depend>moveit_fake_controller_manager</build_depend>
+  <build_depend>moveit_simple_controller_manager</build_depend>
+  <build_depend>joint_state_controller</build_depend>
+  <build_depend>joint_trajectory_controller</build_depend>
+  <build_depend>position_controllers</build_depend>
+  <build_depend>velocity_controllers</build_depend>
+  <build_depend>effort_controllers</build_depend>
+  <build_depend>gazebo_ros_control</build_depend>
+  <build_depend>moveit_ros_planning_interface</build_depend>
+  <build_depend>moveit_ros_warehouse</build_depend>
+  <build_depend>moveit_ros_visualization</build_depend>
+  <build_depend>joint_state_publisher</build_depend>
+  <build_depend>robot_state_publisher</build_depend>
+  <build_depend>xacro</build_depend>
+  <build_depend>iiwa_description</build_depend>
+  <build_depend>iiwa_hw</build_depend>
+
+  <!-- run_depend>iiwa_moveit_config</run_depend -->
+  <run_depend>iiwa_moveit</run_depend>
+  <run_depend>pluginlib</run_depend>
+  <run_depend>moveit_core</run_depend>
+  <run_depend>moveit_commander</run_depend>
+  <run_depend>moveit_fake_controller_manager</run_depend>
+  <run_depend>moveit_ros_planning_interface</run_depend>
+  <run_depend>moveit_ros_perception</run_depend>
+  <run_depend>interactive_markers</run_depend>
+  <run_depend>moveit_visual_tools</run_depend>
+  <run_depend>joy</run_depend>
+  <run_depend>pcl_ros</run_depend>
+  <run_depend>pcl_conversions</run_depend>
+  <run_depend>rosbag</run_depend>
+  <run_depend>tf2_ros</run_depend>
+  <run_depend>tf2_eigen</run_depend>
+  <run_depend>tf2_geometry_msgs</run_depend>
+  
+  <run_depend>iiwa_description</run_depend>
+  
+  <run_depend>message_runtime</run_depend>
+
+<!--  <test_depend>moveit_resources_iiwa_moveit_config</test_depend> -->
+</package>
