@@ -22,7 +22,7 @@
 ### Требования к программному обеспечению
 
 - [Ubuntu 20.04,03 Focal Fossa LTS](https://releases.ubuntu.com/20.04/)
-- Robot operating system (ROS) [Noetic Ninjemys](http://wiki.ros.org/noetic)
+- [Robot operating system (ROS) Noetic Ninjemys](http://wiki.ros.org/noetic)
 - [Intel RealSense SDK 2.0](https://www.intelrealsense.com/sdk-2/)
 - [MoveIt!](https://moveit.ros.org/install/)
 
