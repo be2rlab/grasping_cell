@@ -2,7 +2,7 @@
 
 ![logo](docs/images/grasping_cell.svg)
 
-[documentation in Russian](README_ru.md)
+[Documentation in Russian](README_ru.md)
 
 This repository contains the files of the **Laboratory of Biomechatronics and Energy Efficient Robotics of ITMO University** project to create a universal platform for sorting known and unknown objects by cells. The system detects / classifies objects in space according to technical vision data, sorts them according to the cells corresponding to each object, moving in space with obstacles. The system also has a function of automated retraining, which allows you to study new objects and sort them without reconfiguring the software platform.
 
