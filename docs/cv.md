@@ -1,21 +1,23 @@
-# Модуль детектирования и классификации объектов
+# Classification and detection of objects
 
-Распознавание объектов происходит в 2D пространстве по изоражениям из камеры. Выбор между этим способом и распознаванием в 3D пространстве с использованием облака точек был сделан в пользу первого, потому что для второго требуются большие вычислительные мощности, иначе скорость и качество распознавания будут невелики. 
-Распознавание объектов на изображениях применяется для локализации в трехмерном пространстве. Для этого проводится сегментация изображения, на RGB и Depth изображения накладывается полученная маска и с использованием внутренних параметров камеры строится облако точек найденных объектов, что позволяет локализовать их в 3D пространстве в системе координат камеры. 
-Для задачи характерно изменение внешней среды. В алгоритме распознавания предусмотрена адаптация к новым объектам в процессе работы.
-С учетом имеющихся ограничений было решено использовать предобученную модель для сегментации отдельных объектов [UOAIS](https://github.com/gist-ailab/uoais), чтобы получать маски объектов, предобученный экстрактор признаков [ViT](https://github.com/google-research/vision_transformer) и классификатор k ближайших соседей, что представлено на рисунке:
+Objects are recognized in 2D space by images from the camera. The choice between this method and recognition in 3D space using a point cloud was made in favor of the first, because the second requires large computing power, otherwise the speed and quality of recognition will be low.
+Object recognition in images is used for localization in three-dimensional space. To do this, the image is segmented, the resulting mask is applied to the RGB and Depth of the image, and using the internal parameters of the camera, a point cloud of the found objects is built, which allows them to be localized in 3D space in the camera coordinate system.
+The task is characterized by a change in the external environment. The recognition algorithm provides for adaptation to new objects in the process of work. 
+Given the existing limitations, it was decided to use a pre-trained model for segmenting individual objects [UOAIS](https://github.com/gist-ailab/uoais) in order to obtain object masks, a pre-trained feature extractor [ViT](https://github.com/google-research/vision_transformer) and the k nearest neighbors classifier, which is shown in the figure: 
 
 ![cv1](images/cv1.png)
 
-## Сегментирование объектов
+## Objects segmentation
 
-Алгоритм Unseen object amodal instance segmentation (UOAIS) основывается на модели для сегментации Mask R-CNN, в которой RGB и Depth каналы обрабатываются отдельно. Полученные карты признаков конкатенируются и подаются в сеть прогноза областей (Region Proposal Network). Далее из всей карты признаков выбираются лишь те, которые принадлежат найденным областям и подаются в ветви для детектирования и сегментации. В первой ветви проходит уточнение рамки объекта и его классификация (фон или объект), а во второй находятся видимая маска, амодальная маска (с видимой и скрытой частью объекта) и классификация, определяющая, является ли объект перекрытым другими объектами. Последнее находит свое применение в роботизированной манипуляции объектами, когда требуемый предмет перекрыт другими. 
+The Unseen object amodal instance segmentation (UOAIS) algorithm is based on the Mask R-CNN segmentation model, in which the RGB and Depth channels are processed separately. The resulting feature maps are concatenated and fed into the Region Proposal Network. Further, from the entire feature map, only those that belong to the found areas are selected and fed into the branches for detection and segmentation. The first branch refines the frame of the object and its classification (background or object), and the second branch contains the visible mask, the amodal mask (with the visible and hidden parts of the object) and the classification that determines whether the object is covered by other objects. The latter finds its application in robotic object manipulation when the required object is covered by others. 
 
-Архитектура модели представлена на рисунке:
+The architecture of the model is shown in the figure: 
 
 ![cv2](images/cv2.png)
 
-## Классификация объектов
+## Objects segmentation
 
-Для тестирования был выбран набор данных [CORe50](https://github.com/vlomonaco/core50), служащий в качестве бенчмарка для задач продолжительного обучения (continual learning). Данный набор содержит 50 классов объектов и 120 тысяч изображений, которые подаются последовательно пакетами по 300 штук. 
-В качестве главного подхода был выбран [AR1\*](https://arxiv.org/pdf/1912.01100.pdf), который позволяет сохранять часть данных при новом обучении. На основе этого подхода реализовано дообучение новых объектов в процессе работы системы, без существенной потери качества распознавания выученных ранее.
+For testing, the data set [CORe50](https://github.com/vlomonaco/core50) was chosen, which serves as a benchmark for continuous learning tasks. This set contains 50 object classes and 120,000 images, which are submitted sequentially in batches of 300 pieces.
+[AR1\*](https://arxiv.org/pdf/1912.01100.pdf) was chosen as the main approach, which allows you to save part of the data during new training. On the basis of this approach, additional training of new objects was implemented during the operation of the system, without a significant loss in the quality of recognition of previously learned ones.
+
+[Implementation is provided here.](https://github.com/IvDmNe/unseen_object_segmentation_with_knn_classification/tree/ros_wrapper) 

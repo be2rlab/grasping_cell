@@ -1,50 +1,52 @@
-# Универсальная платформа для сортировки известных и неизвестных объектов по ячейкам
+# Universal platform for sorting known and unknown objects by cells
 
 ![logo](docs/images/grasping_cell.svg)
 
-Этот репозиторий содержит файлы проекта **Лаборатории Биомехатроники и Энергоэффективной робототехники Университета ИТМО** по созданию универсальной платформы для сортировки известных и неизвестных объектов по ячейкам. Система по данным технического зрения детектирует/классифицирует объекты в пространстве, сортирует их по соответствующим каждому объекту ячейкам, перемещаясь в пространстве с препятствиями. Также система имеет функцию автоматизированного дообучения, позволяющую изучать новые объекты и сортировать их без донастройки программной платформы.
+[documentation in Russian](README_ru.md)
 
-## Аппаратная платформа
+This repository contains the files of the **Laboratory of Biomechatronics and Energy Efficient Robotics of ITMO University** project to create a universal platform for sorting known and unknown objects by cells. The system detects / classifies objects in space according to technical vision data, sorts them according to the cells corresponding to each object, moving in space with obstacles. The system also has a function of automated retraining, which allows you to study new objects and sort them without reconfiguring the software platform.
 
-Система построена на базе манипулятора [Kuka LBR iiwa](https://www.kuka.com/ru-ru/%D0%BF%D1%80%D0%BE%D0%B4%D1%83%D0%BA%D1%86%D0%B8%D1%8F-%D1%83%D1%81%D0%BB%D1%83%D0%B3%D0%B8/%D0%BF%D1%80%D0%BE%D0%BC%D1%8B%D1%88%D0%BB%D0%B5%D0%BD%D0%BD%D0%B0%D1%8F-%D1%80%D0%BE%D0%B1%D0%BE%D1%82%D0%BE%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0/%D0%BF%D1%80%D0%BE%D0%BC%D1%8B%D1%88%D0%BB%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D1%80%D0%BE%D0%B1%D0%BE%D1%82%D1%8B/lbr-iiwa). Это коллаборативный манипулятор с 7-ю степенями свободы, который является абсолютно безопасным для человека и может работать рядом с ним без риска нанести ущерб или повредиться.
-Система технического зрения построена на базе камеры [Intel Realsense D435i](https://www.intelrealsense.com/depth-camera-d435i/). Стереопара и камера глубины позволяют с большой точностью определять форму, размеры объектов в пространстве и расстояния до них.
+## Hardware
+The system is based on the manipulator [Kuka LBR iiwa](https://www.kuka.com/ru-ru/%D0%BF%D1%80%D0%BE%D0%B4%D1%83%D0%BA%D1%86%D0%B8%D1%8F-%D1%83%D1%81%D0%BB%D1%83%D0%B3%D0%B8/%D0%BF%D1%80%D0%BE%D0%BC%D1%8B%D1%88%D0%BB%D0%B5%D0%BD%D0%BD%D0%B0%D1%8F-%D1%80%D0%BE%D0%B1%D0%BE%D1%82%D0%BE%D1%82%D0%B5%D1%85%D0%BD%D0%B8%D0%BA%D0%B0/%D0%BF%D1%80%D0%BE%D0%BC%D1%8B%D1%88%D0%BB%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5-%D1%80%D0%BE%D0%B1%D0%BE%D1%82%D1%8B/lbr-iiwa). This is a collaborative manipulator with 7 degrees of freedom, which is absolutely safe for a person and can work next to him without the risk of damage or damage.
+The vision system is based on a camera [Intel Realsense D435i](https://www.intelrealsense.com/depth-camera-d435i/). A stereo and a depth cameras allow you to determine the shape, size of objects in space and their distances with great accuracy.
 
-## Программная платформа
-
-Программная платформа базируется на фреймворке [MoveIt!](https://moveit.ros.org/) и состоит из модуля детектирования/классификации объектов, модуля планирования движения, модуля захвата объектов, модуля дообучения. Взаимодействие между модулями происходит через конечный автомат (Finite state machine). Цикл работы режима сортировки: Переход в начальное положение -> Детектирование и классификация объектов -> Определение ближайшего объекта и сегментация -> Генерация возможных конфигураций манипулятора для захвата объектов -> Планирование движения робота из текущей конфигурации в конфигурацию для захвата -> Перемещение в новую конфигурацию -> Захват объекта -> Планирование движения до ячейки -> Опускание объекта в ячейку -> Возврат в исходное положение. Блок-схема работы системы представлена на рисунке ниже:
+## Software
+The software platform is based on a framework [MoveIt!](https://moveit.ros.org/) and consists of an object detection/classification module, a motion planning module, an object capture module, and an additional training module. Interaction between modules occurs through a finite state machine (FSM). Sorting mode work cycle: Go to start position -> Detection and classification of objects -> Detection of the nearest object and segmentation -> Generation of possible configurations of the manipulator for capturing objects -> Planning the movement of the robot from the current configuration to the configuration for capturing -> Moving to a new configuration - > Capturing the object -> Planning the movement to the cell -> Lowering the object into the cell -> Return to the starting position. The block diagram of the system operation is shown in the figure below:
 
 ![flowchart](docs/images/flow_chart.png)
 
-Взаимодействие с системой происходит через пользовательский интерфейс (GUI interface), который осуществляет включение/выключение системы, а также переключение между режимами автоматизированной сортировки и дообучения новых объектов. Конечный автомат (FSM) отправляет запросы в модули и на основании ответов определяет следующие действия системы. Общая архитектура системы представлена на рисунке ниже:
+Interaction with the system occurs through the user interface (GUI interface), which enables/disables the system, as well as switching between modes of automated sorting and additional training of new objects. The finite state machine (FSM) sends requests to the modules and, based on the responses, determines the next actions of the system. The general architecture of the system is shown in the figure below:
 
 ![architecture](docs/images/architecture.png)
 
-Подробное описание модулей:
-1. [Детектирования и классификации объектов](docs/cv.md)
-2. [Определение положения захватного устройства](docs/grasp.md)
-3. [Планирование движения](docs/plan.md)
-4. [Описание работы сервисов системы и механизма конечных автоматов](docs/fsm.md)
+Detailed description of modules:
 
-## Как использовать
+1. [Detection and classification of objects](docs/cv.md)
+2. [Pose estimation](docs/grasp.md)
+3. [Motion planning](docs/plan.md)
+4. [Work of the services and FSM](docs/fsm.md)
 
-### Требования к программному обеспечению
+## How to use
+
+### Prerequisites
 
 - [Ubuntu 20.04,03 Focal Fossa LTS](https://releases.ubuntu.com/20.04/)
 - [Robot operating system (ROS) Noetic Ninjemys](http://wiki.ros.org/noetic)
 - [Intel RealSense SDK 2.0](https://www.intelrealsense.com/sdk-2/)
 - [MoveIt!](https://moveit.ros.org/install/)
 
-### Установка 
+### Installation
 
-1. Скачать официальный репозиторий с [Kuka LBR iiwa для MoveIt!](https://github.com/IFL-CAMP/iiwa_stack) и установить в рабочее пространство согласно инструкции в репозитории.
-2. Скачать официальный репозиторий с [Intel Realsense D435i](https://github.com/IntelRealSense/realsense-ros) и установить в рабочее пространство согласно инструкции в репозитории.
-3. Скачать файлы данного репозитория в рабочее пространство и запустить сборку проекта (catkin build или catkin_make).
-4. (Опционально) Настроить локальную сеть между роботом и компьютером (для запуска симуляции на компьютере не требуется).
-5. (Опционально) Установить библиотеку планировщиков [OMPL с Модифицированным интеллектуальным двунаправленным быстро исследующем случайным деревом](https://github.com/IDovgopolik/ompl) (для работы можно воспользоваться средствами вшитой в MoveIt! библиотекой планировщиков OMPL).
-6. Запустить систему:
+1. Download the official repository from [Kuka LBR iiwa for MoveIt!](https://github.com/IFL-CAMP/iiwa_stack) and install it into your workspace according to the instructions in the repository.
+2. 2. Download the official repository from [Intel Realsense D435i](https://github.com/IntelRealSense/realsense-ros) and install it into your workspace according to the instructions in the repository.
+3. Download the files of this repository to the workspace and start building the project (catkin build or catkin_make).
+4. (Optional) Set up a local network between the robot and the computer (not required to run the simulation on the computer).
+
+5. (Optional) Install the scheduler library [OMPL with Modified Intelligent Bidirectional Fast Exploring Random Tree](https://github.com/IDovgopolik/ompl) (you can use the OMPL scheduler library built into MoveIt! to work).
+6. Start the system:
 
 ```bash
 roslaunch iiwa_moveit move_group.launch
 roslaunch iiwa_move_group_interface move_group_interface_iiwa.launch
 ```
-**Можно использовать!**
+**Can be used!**
