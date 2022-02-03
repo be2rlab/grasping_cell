@@ -9,6 +9,13 @@ This repo combines:
 2. ```conda activate segmentation_ros```
 3. download model checkpoint from **[GDrive](https://drive.google.com/file/d/1mrNft0aeIqAggnsW2WRUrhQexIHl0shU/view?usp=sharing)** and put it in scripts/checkpoints folder
 
+## Environment setup with Docker (WIP)
+
+1. build docker image ```sudo sh build_docker.sh```
+2. download model checkpoint from **[GDrive](https://drive.google.com/file/d/1mrNft0aeIqAggnsW2WRUrhQexIHl0shU/view?usp=sharing)** and put it in scripts/checkpoints folder
+3. run docker container ```sudo sh run_docker.sh```
+
+
 
 ## Using
 ```roslaunch segmentation segmentation_node.launch```
