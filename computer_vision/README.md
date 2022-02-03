@@ -1,9 +1,7 @@
 # Computer vision
 This repo combines: 
 1. class-agnostic segmentation with wrappers for Detectron2 and MMDetection
-2. classification based on:
-  2.1 transformer feature extractor
-  2.2 kNN classifier
+2. classification based on transformer feature extractor and kNN classifier
 
 ## Environment setup with Anaconda
 
