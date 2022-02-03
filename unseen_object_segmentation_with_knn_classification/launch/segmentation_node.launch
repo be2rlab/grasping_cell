@@ -1,3 +1,0 @@
-<launch>
-    <node name="ros_node" type="segmentation_node.py" pkg="segmentation" output="screen"/>
-</launch>

@@ -1,0 +1,5 @@
+<launch>
+    <include file="$(find realsense2_camera)/launch/rs_aligned_depth.launch">
+        <arg name="enable_pointcloud" value="true"/>
+    </include>
+</launch>
