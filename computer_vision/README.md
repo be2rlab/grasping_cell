@@ -28,4 +28,15 @@ This project was tested with:
 4. ```cd ws; catkin_make; source devel/setup.bash```
 
 ## Using
+Run node:
 ```roslaunch segmentation segmentation_node.launch```
+
+By default, it runs publisher. Optionally you can pass an argument mode:=service to run in service mode.
+Along with inference mode, this node has training mode to save new objects in classifier.
+
+An algorithm for training:
+1. place a new object in a field of view of camera so that it is the nearest detected object in s screen.
+2. Call \segmentation_train_service to mask this object, get featues from feature extractor and save them
+3. Repeat previous step with different angle of view
+4. Call \segmentation_end_train_service to add all saved features to kNN.
+
