@@ -2,4 +2,3 @@
 computer_vision/scripts/checkpoints/segmentation_model_checkpoint.pth
 **/__pycache__/*
 *.pyc
-# computer vision ignores

@@ -121,7 +121,9 @@ ENV FORCE_CUDA="1"
 RUN pip install -r mmdetection/requirements/build.txt &&\
     pip install --no-cache-dir -e mmdetection
 
-RUN pip install faiss-cpu
+RUN pip install faiss-cpu \
+    -U albumentations --no-binary qudida,albumentations
+
 
 RUN echo "source /ws/devel/setup.bash --extend" >> ~/.bashrc
 

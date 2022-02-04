@@ -37,8 +37,9 @@ class AllModel:
         else:
             self.fe = fe
         self.fe.eval()
+
         if fe_fp16:
-            self.fe.half()
+            self.fe = self.fe.half()
 
         if torch.cuda.is_available():
             self.fe.cuda()
@@ -57,6 +58,7 @@ class AllModel:
         self.fe_transforms = A.Compose([
             A.LongestMaxSize(max_size=150),
             A.PadIfNeeded(min_height=150, min_width=150, border_mode=cv.BORDER_CONSTANT, p=1),
+            A.Normalize(),
             ToTensorV2()
         ])
         self.fe_augmentations = A.Compose([
@@ -66,6 +68,7 @@ class AllModel:
             A.Flip(),
             A.ShiftScaleRotate(p=1),
             A.CenterCrop(150, 150, p=1),
+            A.Normalize(),
             ToTensorV2()
         ])
 
@@ -85,8 +88,7 @@ class AllModel:
             transformed_objs = torch.stack(
                 [self.fe_transforms(image=i)['image'] for i in cropped_objs]).cuda()
 
-            # plt.imshow(cropped_objs[0])
-            # plt.show()
+
             if self.fe_fp16:
                 transformed_objs = transformed_objs.half()
 
@@ -102,8 +104,6 @@ class AllModel:
 
             nearest_mask_id = get_nearest_mask_id(depth_im, masks)
 
-            # plt.imshow(cropped_objs[nearest_mask_id])
-            # plt.show()
             
             if self.n_augmented_crops:
                 transformed_objs = [self.fe_augmentations(image=cropped_objs[nearest_mask_id])['image'] for _ in range(self.n_augmented_crops)]
@@ -111,9 +111,7 @@ class AllModel:
             else:
                 transformed_objs = torch.tensor(self.fe_transforms(image=cropped_objs[nearest_mask_id])['image']).unsqueeze(0).cuda()
 
-            
-            # transformed_objs = torch.stack(
-            #     [self.fe_transforms(i) for i in cropped_objs]).cuda()
+    
 
             if self.fe_fp16:
                 transformed_objs = transformed_objs.half()
@@ -129,19 +127,9 @@ class AllModel:
 
             return self.save_feature(features)
 
-            # cls, confs, dists = self.classifier.classify(features)
-
-            # return (masks, features, cropped_objs)# if train else ((cls, confs, dists), masks)
-
 
     def save_feature(self, features):
         self.features_to_save += features
-        # feats = np.stack(features)
-        # self.classifier.add_points(
-        #     # feats, [f'object_{len(self.classifier.classes)}'] * len(feats))
-        #     feats, [f'{len(self.classifier.classes)}'] * len(feats))
-        # self.classifier.print_info()
-        # # self.features_to_save = []
         return 'features saved'
 
     def add_to_knn(self):
@@ -150,20 +138,6 @@ class AllModel:
         self.classes.append(f'{len(self.classifier.classes) + 1}')
 
         self.classifier.add_points(
-            # feats, [f'object_{len(self.classifier.classes)}'] * len(feats))
             feats, [f'{len(self.classifier.classes) + 1}'] * len(feats))
         self.classifier.print_info()
         self.features_to_save = []
-
-    # def addToKNN(self, masked_objs, labels):
-
-    #     if not isinstance(masked_objs, list):
-    #         masked_objs = [masked_objs]
-
-    #     assert len(masked_objs) == len(labels)
-
-    #     transformed_objs = torch.stack(
-    #         [self.fe_transforms(image=i)['image'] for i in masked_objs]).cuda()
-    #     features = self.fe(transformed_objs).cpu()
-
-    #     self.classifier.add_points(features, labels)

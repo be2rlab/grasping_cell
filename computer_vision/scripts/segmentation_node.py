@@ -86,7 +86,7 @@ class VisionNode:
         self.model = AllModel(
             dataset_save_folder=f'{script_dir}/segmentation_dataset',
             segm_config=f'{script_dir}/checkpoints/SOLO_complete_config.py',
-            segm_checkpoint=f'{script_dir}/checkpoints/segmentation_model_checkpoint.pth',
+            segm_checkpoint=f'{script_dir}/checkpoints/best_segm_mAP_epoch_15.pth',
             segm_conf_thresh=0.8,
             n_augmented_crops=10,
             fe=torch.hub.load(
@@ -180,9 +180,11 @@ class VisionNode:
                 return SegmentAndClassifyServiceResponse(results) 
             else:
                 self.results_pub.publish(results)
+                rospy.logwarn(f'FPS: {(1 /(time.time() - start)):.2f}')
                 return   
 
-        rospy.loginfo_throttle(2, f'FPS: {(1 /(time.time() - start)):.2f}')
+        rospy.logwarn(f'FPS: {(1 /(time.time() - start)):.2f}')
+        # rospy.loginfo_throttle(2, f'FPS: {(1 /(time.time() - start)):.2f}')
         # send an answer
         if self.type == 'topic':
             self.results_pub.publish(results)
