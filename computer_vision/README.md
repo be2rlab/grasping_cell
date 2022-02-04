@@ -3,6 +3,14 @@ This repo combines:
 1. class-agnostic segmentation with wrappers for Detectron2 and MMDetection
 2. classification based on transformer feature extractor and kNN classifier
 
+# System requirements
+
+This project was tested with:
+- Ubuntu 20.04
+- ROS noetic
+- torch 1.10
+- CUDA 11.3
+- NVIDIA GTX 1050ti/ RTX 3090
 
 ## Preparations:
 1. clone this folder to your workspace/src directory
