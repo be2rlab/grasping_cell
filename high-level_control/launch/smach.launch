@@ -1,0 +1,3 @@
+<launch>
+    <node name="High-level_control" type="main.py" pkg="kuka_smach_control"/>
+</launch>
