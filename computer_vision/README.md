@@ -18,12 +18,7 @@ This repo combines:
 2. download model checkpoint from **[GDrive](https://drive.google.com/file/d/1mrNft0aeIqAggnsW2WRUrhQexIHl0shU/view?usp=sharing)** and put it in scripts/checkpoints folder
 3. Change line 7 in ```run_docker.sh``` to your workspace folder
 4. run docker container ```sudo sh run_docker.sh```
-5. ```
-  cd ws
-  catkin_make
-  source devel/setup.bash```
-
-
+5. ```cd ws; catkin_make; source devel/setup.bash```
 
 ## Using
 ```roslaunch segmentation segmentation_node.launch```
