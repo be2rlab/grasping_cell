@@ -10,7 +10,7 @@ This project was tested with:
 - ROS noetic
 - torch 1.10
 - CUDA 11.3
-- NVIDIA GTX 1050ti/ RTX 3090
+- NVIDIA GTX 1050ti / RTX 3090
 
 ## Preparations:
 1. clone this folder to your workspace/src directory
