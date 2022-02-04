@@ -1,24 +1,21 @@
-# unseen_object_segmentation_with_knn_classification
-This repo combines class-agnostic segmentation with classification based on transformer feature extractor and kNN classifier
-
-# Installation
-
-## Docker setup (preferred)
-1. Create workspace: ```mkdir cv_ws/src -p; cd cv_ws/src```
-2. clone this repo ```git clone -b ros_wrapper https://github.com/IvDmNe/unseen_object_segmentation_with_knn_classification.git```
-3. build docker image: ```sh build_docker.sh```
-4. download model checkpoint from **[GDrive](https://drive.google.com/file/d/1mrNft0aeIqAggnsW2WRUrhQexIHl0shU/view?usp=sharing)** and put it in scripts/models folder
-
-
-
-## Docker Running
-1. Launch outside docker ```roslaunch realsense2_camera rs_aligned_depth.launch```
-2. go to docker ```sh run_docker.sh```
-3. Run segmentation and filtering node ```roslaunch segmentation launch_node.py```
-
+# Computer vision
+This repo combines: 
+1. class-agnostic segmentation with wrappers for Detectron2 and MMDetection
+2. classification based on transformer feature extractor and kNN classifier
 
 ## Environment setup with Anaconda
 
-1. Create anaconda environment: ```conda env create -n environment.yml```
-2. download model checkpoint from **[GDrive](https://drive.google.com/file/d/1mrNft0aeIqAggnsW2WRUrhQexIHl0shU/view?usp=sharing)** and put it in scripts/models folder
-3. ```conda activate segmentation_ros```
+1. Create anaconda environment: ```conda env create -n conda_environment.yml```
+2. ```conda activate segmentation_ros```
+3. download model checkpoint from **[GDrive](https://drive.google.com/file/d/1mrNft0aeIqAggnsW2WRUrhQexIHl0shU/view?usp=sharing)** and put it in scripts/checkpoints folder
+
+## Environment setup with Docker (WIP)
+
+1. build docker image ```sudo sh build_docker.sh```
+2. download model checkpoint from **[GDrive](https://drive.google.com/file/d/1mrNft0aeIqAggnsW2WRUrhQexIHl0shU/view?usp=sharing)** and put it in scripts/checkpoints folder
+3. run docker container ```sudo sh run_docker.sh```
+
+
+
+## Using
+```roslaunch segmentation segmentation_node.launch```
