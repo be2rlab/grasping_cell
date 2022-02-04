@@ -16,7 +16,7 @@ This repo combines:
 
 1. build docker image ```sudo sh build_docker.sh```
 2. download model checkpoint from **[GDrive](https://drive.google.com/file/d/1mrNft0aeIqAggnsW2WRUrhQexIHl0shU/view?usp=sharing)** and put it in scripts/checkpoints folder
-3. Change line 7 in ```run_docker.sh``` to your workspace folder
+3. In line 7 in ```run_docker.sh``` change first path to your workspace folder
 4. run docker container ```sudo sh run_docker.sh```
 5. ```cd ws; catkin_make; source devel/setup.bash```
 
