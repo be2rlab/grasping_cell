@@ -43,10 +43,13 @@ Detailed description of modules:
 4. (Optional) Set up a local network between the robot and the computer (not required to run the simulation on the computer).
 
 5. (Optional) Install the scheduler library [OMPL with Modified Intelligent Bidirectional Fast Exploring Random Tree](https://github.com/IDovgopolik/ompl) (you can use the OMPL scheduler library built into MoveIt! to work).
-6. Start the system:
+6. Start Kuka control system:
 
 ```bash
 roslaunch iiwa_moveit move_group.launch
 roslaunch iiwa_move_group_interface move_group_interface_iiwa.launch
 ```
+7. Start Path planning and execution module
+8. Start Object recognition module according to [this](https://github.com/be2rlab/grasping_cell/tree/master/computer_vision/README.md#using).
+9. Start Grasping generating moudle according to [this](https://github.com/be2rlab/grasping_cell/blob/master/contact_graspnet/README.md#using) 
 **Can be used!**
