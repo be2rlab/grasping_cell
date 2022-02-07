@@ -41,6 +41,12 @@ Test data
 
 Download the test data from https://drive.google.com/drive/folders/1v0_QMTUIEOcu09Int5V6N2Nuq7UCtuAA and copy them them into the test_data/ folder.
 
+# Using 
+
+1. activate conda environment ``` conda activate tf-gpu-example```
+2. run nodes ```roslaunch contact_graspnet generate_grasps.launch```
+
+
 ## 3. ROS Server Interface
 ### 3.1 grasp_planner ([ContactGraspNetPlanner](./srv/ContactGraspNetPlanner.srv))
 #### 3.1.1 Service Request Messages
