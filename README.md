@@ -47,6 +47,9 @@ Detailed description of modules:
 6. Install [grasp generating](https://github.com/be2rlab/grasping_cell/blob/master/contact_graspnet) and [object recognition](https://github.com/be2rlab/grasping_cell/tree/master/computer_vision) modules
 
 ### Using
+
+Each step is recommended to be executed in separated terminal windows to monitor all modules states
+
 1. Start Kuka control system:
 
 ```bash
