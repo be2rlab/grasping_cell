@@ -44,7 +44,7 @@ Detailed description of modules:
 
 5. (Optional) Install the scheduler library [OMPL with Modified Intelligent Bidirectional Fast Exploring Random Tree](https://github.com/IDovgopolik/ompl) (you can use the OMPL scheduler library built into MoveIt! to work).
 
-6. Install [grasp generating]((https://github.com/be2rlab/grasping_cell/blob/master/contact_graspnet) and [object recognition](https://github.com/be2rlab/grasping_cell/tree/master/computer_vision) modules
+6. Install [grasp generating](https://github.com/be2rlab/grasping_cell/blob/master/contact_graspnet) and [object recognition](https://github.com/be2rlab/grasping_cell/tree/master/computer_vision) modules
 
 ### Using
 1. Start Kuka control system:
