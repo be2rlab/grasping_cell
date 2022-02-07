@@ -51,5 +51,6 @@ roslaunch iiwa_move_group_interface move_group_interface_iiwa.launch
 ```
 7. Start Path planning and execution module
 8. Start Object recognition module according to [this](https://github.com/be2rlab/grasping_cell/tree/master/computer_vision/README.md#using).
-9. Start Grasping generating moudle according to [this](https://github.com/be2rlab/grasping_cell/blob/master/contact_graspnet/README.md#using) 
+9. Start Grasping generating moudle according to [this](https://github.com/be2rlab/grasping_cell/blob/master/contact_graspnet/README.md#using).
+
 **Can be used!**
