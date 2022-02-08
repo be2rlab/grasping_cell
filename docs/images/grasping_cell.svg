@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1985pt" height="577pt" viewBox="0 0 1985 577" version="1.1">
-<g id="surface3595">
-<path style=" stroke:none;fill-rule:evenodd;fill:rgb(100%,100%,100%);fill-opacity:0.75;" d="M 1985 577 L 1985 1 L 1 1 L 1 577 Z M 1985 577 "/>
+<g id="surface12095">
+<path style=" stroke:none;fill-rule:evenodd;fill:rgb(100%,100%,100%);fill-opacity:1;" d="M 1985 577 L 1985 1 L 1 1 L 1 577 Z M 1985 577 "/>
 <path style="fill-rule:evenodd;fill:rgb(93.3%,51%,93.3%);fill-opacity:1;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%,0%,0%);stroke-opacity:0.75;stroke-miterlimit:10;" d="M 1216 3568 L 1024 3376 L 1792 3376 L 1920 3568 Z M 1216 3568 " transform="matrix(1,0,0,-1,-447,3713)"/>
 <path style="fill-rule:evenodd;fill:rgb(100%,100%,100%);fill-opacity:1;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%,0%,0%);stroke-opacity:0.75;stroke-miterlimit:10;" d="M 1504 3448 L 1648 3448 L 1696 3512 L 1568 3512 Z M 1504 3448 " transform="matrix(1,0,0,-1,-447,3713)"/>
 <path style="fill-rule:evenodd;fill:rgb(93.3%,51%,93.3%);fill-opacity:0.75;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(0%,0%,0%);stroke-opacity:1;stroke-miterlimit:10;" d="M 1696 3512 L 1693.238281 3508.308594 L 1576 3508 L 1575.628906 3512 Z M 1696 3512 " transform="matrix(1,0,0,-1,-447,3713)"/>

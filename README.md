@@ -2,6 +2,8 @@
 
 <p align="center"><img src="docs/images/grasping_cell.svg" alt="iptv" width="auto" height="150"></p>
 
+[![Github All Releases](https://img.shields.io/github/downloads/be2rlab/grasping_cell/total)]() ![GitHub last commit](https://img.shields.io/github/last-commit/be2rlab/grasping_cell) ![GitHub last commit](https://img.shields.io/github/license/be2rlab/grasping_cell)
+
 
 This repository contains the files of the [International Laboratory of Biomechatronics and Energy Efficient Robotics of ITMO University](http://irc.ifmo.ru/en/95913/) project to create a universal platform for sorting known and unknown objects by cells. The system detects / classifies objects in space according to technical vision data, sorts them according to the cells corresponding to each object, moving in space with obstacles. The system also has a function of automated retraining, which allows you to study new objects and sort them without reconfiguring the software platform.
 
