@@ -1,4 +1,4 @@
-# Work of the services and FSM
+# ros-services and FSM
 
 ## General description
 
