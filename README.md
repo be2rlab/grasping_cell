@@ -111,10 +111,22 @@ catkin build -j8
 
 Each step is recommended to be executed in separated terminal windows to monitor all modules states
 
-1. [`for PC with rt-kernel`] Start Kuka control system:
+1. [`for PC with rt-kernel`] Start Kuka control system (we choose one of the following three commands (a, b or c) then we move to the instruction d):
 
+  a. In simulation (rviz):
 ```bash
 roslaunch iiwa_moveit move_group.launch
+```
+  b. Or for execution in Gazebo:
+```
+roslaunch iiwa_moveit moveit_planning_execution.launch sim:=true
+```
+  c. Or if we are connecting to a Real Robot, we use:
+```
+roslaunch iiwa_moveit moveit_planning_execution.launch sim:=true
+```
+  d. Start the pick and place node:
+```
 roslaunch iiwa_move_group_interface move_group_interface_iiwa.launch
 ```
 
