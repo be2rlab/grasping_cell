@@ -18,30 +18,28 @@ class classifier:
         self.x_data = None
         self.y_data = None
         self.save_file = knn_file if not savefile else savefile
-        self.classes = None
+        self.classes = []
 
         self.save_to_file = save_to_file
 
-        self.model = KNeighborsClassifier(n_neighbors=1, weights='uniform', n_jobs=-1)
+        self.model = KNeighborsClassifier(
+            n_neighbors=10, weights='distance', metric='cosine', n_jobs=-1)
         self.le = LabelEncoder()
 
-        self.outlier_detector = SGDOneClassSVM(tol=1e-6)
+        # self.outlier_detector = SGDOneClassSVM(tol=1e-6)
+        self.outlier_detector = LocalOutlierFactor(
+            novelty=True, metric='cosine', n_neighbors=5)
 
         if knn_file:
             print(f'loading data from file: {knn_file}')
             if (os.path.exists(knn_file)):
                 print('File found')
                 data = torch.load(knn_file)
-                self.x_data = data['x'].numpy()
-                self.y_data = data['y']
+                self.add_points(data['x'], data['y'])
+
                 print(
                     f'Found {self.x_data.shape[0]} points with {len(set(self.y_data))} classes')
                 print(pd.Series(self.y_data).value_counts())
-                self.classes = list(set(self.y_data))
-
-                label_data = self.le.fit_transform(self.y_data)
-                self.outlier_detector.fit(self.x_data)
-                self.model.fit(self.x_data, label_data)
 
             else:
                 print('File not found')
@@ -60,10 +58,11 @@ class classifier:
         self.classes = list(set(self.y_data))
         self.label_data = self.le.fit_transform(self.y_data)
         self.outlier_detector.fit(self.x_data)
+        print(self.outlier_detector.offset_)
         self.model.fit(self.x_data, self.label_data)
 
         if self.save_to_file:
-            torch.save({'x': self.x_data.cpu(),
+            torch.save({'x': self.x_data,
                         'y': self.y_data}, self.save_file)
 
     def remove_class(self, cl):
@@ -77,7 +76,7 @@ class classifier:
         self.outlier_detector.fit(self.x_data)
         self.model.fit(self.x_data, self.y_data)
         if self.save_to_file:
-            torch.save({'x': self.x_data.cpu(),
+            torch.save({'x': self.x_data,
                         'y': self.y_data}, self.save_file)
 
     def classify(self, x):
@@ -93,7 +92,9 @@ class classifier:
         confs = np.max(probs, axis=1)
 
         outliers = self.outlier_detector.predict(x)
+        scores = self.outlier_detector.decision_function(x)
 
-        D = np.array([1000 if o == -1 else 0 for o in outliers])
+        D = np.array([1000.0 if o == -1 else 0.0 for o in outliers])
+        D += scores
 
         return classes, confs, D

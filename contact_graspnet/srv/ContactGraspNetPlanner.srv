@@ -1,0 +1,8 @@
+# request params
+sensor_msgs/Image color_image
+sensor_msgs/Image detph_image
+sensor_msgs/CameraInfo camera_info
+sensor_msgs/Image segmask
+---
+# response params
+ContactGrasp[] grasps

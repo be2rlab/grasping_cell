@@ -3,16 +3,16 @@ import numpy as np
 from mmdet.apis import inference_detector, init_detector
 import cv2 as cv
 
+
 class MMDetWrapper:
-    def __init__(self, segm_conf_thresh=0.7, segm_config='models/mmdet_config.py', segm_checkpoint='models/latest.pth', **kwargs):
+    def __init__(self, segm_conf_thresh=0.7, segm_config='models/mmdet_config.py', segm_checkpoint='models/latest.pth', device='cuda', **kwargs):
 
         self.conf_thresh = segm_conf_thresh
         # initialize the detector
         self.model = init_detector(
-            segm_config, segm_checkpoint, device='cuda:0')
+            segm_config, segm_checkpoint, device=device)
 
     def __call__(self, image):
-
 
         result = inference_detector(self.model, image)
 
@@ -21,7 +21,6 @@ class MMDetWrapper:
         for box, mask in zip(result[0][0], result[1][0]):
 
             box, conf = box[:-1], box[-1]
-
 
             if conf < self.conf_thresh:
                 continue
@@ -33,7 +32,6 @@ class MMDetWrapper:
             box = box.astype(int)
 
             tmp_im = image.copy()
-
 
             tmp_im[~mask] = (0, 0, 0)
 

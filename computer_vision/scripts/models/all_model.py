@@ -28,8 +28,11 @@ class AllModel:
         script_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.dataset_save_folder = dataset_save_folder
+
+        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
         # prepare models for segmentation, feature extraction and classification
-        self.segm_model = MMDetWrapper(**kwargs)
+        self.segm_model = MMDetWrapper(device=self.device, **kwargs)
 
         if not fe:
             self.fe = torch.hub.load(
@@ -41,35 +44,33 @@ class AllModel:
         if fe_fp16:
             self.fe = self.fe.half()
 
-        if torch.cuda.is_available():
-            self.fe.cuda()
+        self.fe.to(self.device)
 
-        self.classifier = knn(**kwargs)
-        # self.classifier = classifier(**kwargs)
+        # self.classifier = knn(**kwargs)
+        self.classifier = classifier(**kwargs)
 
         # check if saved knn file has same dimensionality as feature extractor
         if self.classifier.x_data is not None:
             sample_input = torch.ones(
-                (1, 3, 224, 224), dtype=torch.float32, device='cuda', )
+                (1, 3, 224, 224), dtype=torch.float32, device=self.device)
             if fe_fp16:
                 sample_input = sample_input.half()
 
-
         self.fe_transforms = A.Compose([
-            A.LongestMaxSize(max_size=150),
-            A.PadIfNeeded(min_height=150, min_width=150, border_mode=cv.BORDER_CONSTANT, p=1),
+            A.Resize(224, 224, p=1),
             A.Normalize(),
             ToTensorV2()
         ])
         self.fe_augmentations = A.Compose([
-            A.LongestMaxSize(max_size=224),
-            A.PadIfNeeded(min_height=224, min_width=224, border_mode=cv.BORDER_CONSTANT, p=1),
-            # A.RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4),
+            A.LongestMaxSize(max_size=300),
+            A.PadIfNeeded(min_height=300, min_width=300,
+                          border_mode=cv.BORDER_CONSTANT, p=1),
+            A.RandomBrightnessContrast(
+                brightness_limit=0.0, contrast_limit=0.4),
             A.Flip(),
-            A.ShiftScaleRotate(p=1),
-            A.CenterCrop(150, 150, p=1),
-            A.Normalize(),
-            ToTensorV2()
+            A.ShiftScaleRotate(shift_limit=0.125, scale_limit=0.2,
+                               rotate_limit=90, border_mode=cv.BORDER_CONSTANT, p=1),
+            A.CenterCrop(224, 224, p=0.3)
         ])
 
         self.features_to_save = []
@@ -79,15 +80,14 @@ class AllModel:
     @torch.no_grad()
     def __call__(self, color_im, depth_im, train=False):
 
-        if not train: 
-            
+        if not train:
+
             cropped_objs, masks = self.segm_model(color_im)
             if not cropped_objs:
                 return (None, None, None), masks
 
             transformed_objs = torch.stack(
-                [self.fe_transforms(image=i)['image'] for i in cropped_objs]).cuda()
-
+                [self.fe_transforms(image=i)['image'] for i in cropped_objs]).to(self.device)
 
             if self.fe_fp16:
                 transformed_objs = transformed_objs.half()
@@ -104,29 +104,31 @@ class AllModel:
 
             nearest_mask_id = get_nearest_mask_id(depth_im, masks)
 
-            
             if self.n_augmented_crops:
-                transformed_objs = [self.fe_augmentations(image=cropped_objs[nearest_mask_id])['image'] for _ in range(self.n_augmented_crops)]
-                transformed_objs = torch.stack(transformed_objs).cuda()
+                augmented_crops = [self.fe_augmentations(image=cropped_objs[nearest_mask_id])[
+                    'image'] for _ in range(self.n_augmented_crops)]
+                # transformed_objs = torch.stack(transformed_objs).cuda()
             else:
-                transformed_objs = torch.tensor(self.fe_transforms(image=cropped_objs[nearest_mask_id])['image']).unsqueeze(0).cuda()
+                augmented_crops = [cropped_objs[nearest_mask_id]]
+                # transformed_objs = torch.tensor(self.fe_transforms(
+                #     image=cropped_objs[nearest_mask_id])['image']).unsqueeze(0).cuda()
 
-    
+            cl = f'{len(self.classifier.classes) + 1}'
+            t_stamp = time.time()
+            for idx, crop in enumerate(augmented_crops):
+                fname = f'{self.dataset_save_folder}/{cl}/{(t_stamp):.2f}_{idx}.png'
+                os.makedirs(f'{self.dataset_save_folder}/{cl}', exist_ok=True)
+                cv.imwrite(fname, crop)
+
+            transformed_objs = torch.stack([self.fe_transforms(
+                image=cr)['image'] for cr in augmented_crops]).to(self.device)
 
             if self.fe_fp16:
                 transformed_objs = transformed_objs.half()
 
             features = self.fe(transformed_objs).cpu().float()
 
-            cl = f'{len(self.classifier.classes) + 1}'
-            fname = f'{self.dataset_save_folder}/{cl}/{(time.time()):.2f}.png'
-
-
-            os.makedirs(f'{self.dataset_save_folder}/{cl}', exist_ok=True)
-            cv.imwrite(fname, cropped_objs[nearest_mask_id])
-
             return self.save_feature(features)
-
 
     def save_feature(self, features):
         self.features_to_save += features

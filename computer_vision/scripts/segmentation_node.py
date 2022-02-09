@@ -30,7 +30,7 @@ lock = threading.Lock()
 class VisionNode:
     def __init__(self):
         # type 'topic' or 'service'
-        self.type = rospy.get_param("/node_type", "topic") 
+        self.type = rospy.get_param("/node_type", "topic")
         self.cv_bridge = CvBridge()
 
         self.im = None
@@ -77,10 +77,10 @@ class VisionNode:
 
         self.train_srv = rospy.Service(
             'segmentation_train_service', Trigger, self.service_train_callback)
-        
+
         self.end_train_srv = rospy.Service(
             'segmentation_end_train_service', Trigger, self.service_end_training_callback)
-            
+
         script_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.model = AllModel(
@@ -88,13 +88,13 @@ class VisionNode:
             segm_config=f'{script_dir}/checkpoints/SOLO_complete_config.py',
             segm_checkpoint=f'{script_dir}/checkpoints/best_segm_mAP_epoch_15.pth',
             segm_conf_thresh=0.8,
-            n_augmented_crops=10,
+            n_augmented_crops=20,
             fe=torch.hub.load(
                 'facebookresearch/dino:main', 'dino_vits16'),
             fe_fp16=False,
-            knn_file=f'{script_dir}/checkpoints/features_w_labels_vits16.pth',
+            knn_file=f'{script_dir}/checkpoints/temp2.pth',
             save_to_file=False,
-            knn_size=20
+            knn_size=5
         )
 
         rospy.logwarn('Init complete!')
@@ -139,12 +139,11 @@ class VisionNode:
 
         (cl_names, cl_confs, cl_dists), masks = self.model(rgb, depth)
 
-
         nearest_mask = get_nearest_mask_id(depth, masks)
 
         depth_mask = cv.bitwise_and(
             depth, depth, mask=masks[nearest_mask])
-        
+
         if len(masks) == 0:
             depth_mask = np.zeros_like(depth_mask)
 
@@ -152,8 +151,8 @@ class VisionNode:
             rgb,
             depth,
             masks,
-            cl_names, 
-            cl_confs, 
+            cl_names,
+            cl_confs,
             cl_dists,
             conf_thresh=0.7,
             dist_thresh=55,
@@ -163,25 +162,26 @@ class VisionNode:
             show_low_prob=True)
 
         if cl_names is not None:
-            cl_names = [str(self.model.classes.index(cls) + 1) for cls in cl_names]
+            cl_names = [str(self.model.classes.index(cls) + 1)
+                        for cls in cl_names]
 
         # prepare an answer
-        results = get_ros_result(masks, depth_mask, cl_names, cl_confs, cl_dists, nearest_mask)
+        results = get_ros_result(
+            masks, depth_mask, cl_names, cl_confs, cl_dists, nearest_mask)
 
         vis_msg = self.cv_bridge.cv2_to_imgmsg(
             visualized_masks.astype(np.uint8), encoding='bgr8')
         vis_msg.header.stamp = rospy.get_rostime()
         self.vis_pub.publish(vis_msg)
-        
 
         if self.model.classifier.classes == []:
             rospy.logwarn_throttle(5000, 'No trained classes found')
             if self.type == 'service':
-                return SegmentAndClassifyServiceResponse(results) 
+                return SegmentAndClassifyServiceResponse(results)
             else:
                 self.results_pub.publish(results)
                 rospy.logwarn(f'FPS: {(1 /(time.time() - start)):.2f}')
-                return   
+                return
 
         rospy.logwarn(f'FPS: {(1 /(time.time() - start)):.2f}')
         # rospy.loginfo_throttle(2, f'FPS: {(1 /(time.time() - start)):.2f}')
@@ -195,7 +195,6 @@ class VisionNode:
             self.cropped_depth_pub.publish(depth_mask_msg)
         else:
             return SegmentAndClassifyServiceResponse(results)
-
 
     def service_train_callback(self, request):
 
@@ -222,7 +221,7 @@ class VisionNode:
 
             resp.success = True
             resp.message = status
-        
+
             return resp
 
     def service_end_training_callback(self, request):

@@ -1,0 +1,5 @@
+sensor_msgs/Image depth_masked
+---
+# response params
+bool success
+ContactGrasp[] grasps

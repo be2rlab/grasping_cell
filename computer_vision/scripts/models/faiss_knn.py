@@ -6,6 +6,7 @@ import torch
 import os
 from scipy import stats as s
 from sklearn.linear_model import SGDOneClassSVM
+from sklearn.neighbors import LocalOutlierFactor
 
 
 class knn:
@@ -19,7 +20,7 @@ class knn:
 
         self.save_to_file = save_to_file
 
-        self.faiss_index = None        
+        self.faiss_index = None
 
         self.pca = torch.load(pca_ckpt) if pca_ckpt is not None else None
 
