@@ -55,7 +55,7 @@ Interaction with the system occurs through the user interface (GUI interface), w
 
 ### Prerequisites
 
-- PC with [real time kernal]() linux 
+- PC with [real time kernel]() linux 
 - PC with nvidia graphics and [Ubuntu 20.04,03 Focal Fossa LTS](https://releases.ubuntu.com/20.04/)
 - [Robot operating system (ROS) Noetic Ninjemys](http://wiki.ros.org/noetic)
 - [Intel RealSense SDK 2.0](https://www.intelrealsense.com/sdk-2/)
@@ -63,7 +63,7 @@ Interaction with the system occurs through the user interface (GUI interface), w
 
 ### Installation
 
-#### For PC with rt-kernal linux
+#### For PC with rt-kernel linux
 
 0. Setup network with `172.31.1.150/16`
 1. Add to `~/.bashrc`
@@ -109,14 +109,14 @@ catkin build -j8
 
 Each step is recommended to be executed in separated terminal windows to monitor all modules states
 
-1. [`for PC with rt-kernal`] Start Kuka control system:
+1. [`for PC with rt-kernel`] Start Kuka control system:
 
 ```bash
 roslaunch iiwa_moveit move_group.launch
 roslaunch iiwa_move_group_interface move_group_interface_iiwa.launch
 ```
 
-2. [`for PC with rt-kernal`] Start Path planning and execution module
+2. [`for PC with rt-kernel`] Start Path planning and execution module
 3. [`for PC with nvidia graphics`] Start Object recognition module according to [this](https://github.com/be2rlab/grasping_cell/tree/master/computer_vision/README.md#using).
 4. [`for PC with nvidia graphics`] Start Grasping generating moudle according to [this](https://github.com/be2rlab/grasping_cell/blob/master/contact_graspnet/README.md#using).
 
