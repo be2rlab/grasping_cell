@@ -95,6 +95,8 @@ export ROS_MASTER_URI=http://172.31.1.150:11311
 
 ```
 roscd
+mkdir ../src
+cd ../src
 git clone --recursive git@github.com:be2rlab/grasping_cell.git
 catkin build -j8
 ```
