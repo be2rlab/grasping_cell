@@ -32,8 +32,8 @@ distances with great accuracy.
 - KUKA LBR iiwa 820
 - Intel RealSense D435
 - Gripper ([this one](https://github.com/be2rlab/uhvat_gripper) looks pretty good)
-- PC with rt-kernal
-- PC with nvidia graphics
+- PC with rt-kernel
+- PC with NVIDIA GPU
 - network switch
 - 5m usb type-c cable
 - Several Ethernet cables
