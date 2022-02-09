@@ -1,0 +1,3 @@
+<launch>
+    <node name="control_node" type="main.py" pkg="high_level_control"/>
+</launch>
