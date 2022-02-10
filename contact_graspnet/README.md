@@ -73,11 +73,9 @@ Download trained models from https://drive.google.com/drive/folders/1tBHKf60K8DL
     * Default: 0
 
 ## 4. Launch ROS node
-### 4.1 How to use my_node.py
-
 Start Grasp Planner Server Node
 ```
-roslaunch contact_graspnet_planner grasp_planner.launch
+roslaunch contact_graspnet_planner generating_grasps.launch
 ```
 ## Citation
 
