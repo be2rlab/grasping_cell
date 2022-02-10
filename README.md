@@ -125,10 +125,6 @@ roslaunch iiwa_moveit moveit_planning_execution.launch sim:=true
 ```
 roslaunch iiwa_moveit moveit_planning_execution.launch sim:=false
 ```
-  d. Start the pick and place node:
-```
-roslaunch iiwa_move_group_interface move_group_interface_iiwa.launch
-```
 
 2. [`for PC with rt-kernel`] Start the pick and place node 
 ```
