@@ -1,5 +1,0 @@
-sensor_msgs/Image mask
----
-# response params
-bool success
-ContactGrasp[] grasps

@@ -7,5 +7,4 @@
         <arg name="forward_passes" value="3"/>
         <arg name="local_regions" value="True"/>
     </include>
-    <!-- <node name="service_wrapper" type="my_node.py" pkg="contact_graspnet_planner"/> -->
 </launch>
