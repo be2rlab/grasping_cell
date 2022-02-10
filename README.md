@@ -130,7 +130,10 @@ roslaunch iiwa_moveit moveit_planning_execution.launch sim:=true
 roslaunch iiwa_move_group_interface move_group_interface_iiwa.launch
 ```
 
-2. [`for PC with rt-kernel`] Start Path planning and execution module
+2. [`for PC with rt-kernel`] Start the pick and place node 
+```
+roslaunch iiwa_move_group_interface move_group_interface_iiwa.launch
+```
 3. [`for PC with nvidia graphics`] Start Object recognition module according to [this](https://github.com/be2rlab/grasping_cell/tree/master/computer_vision/README.md#using).
 4. [`for PC with nvidia graphics`] Start Grasping generating moudle according to [this](https://github.com/be2rlab/grasping_cell/blob/master/contact_graspnet/README.md#using).
 
