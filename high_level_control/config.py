@@ -5,7 +5,6 @@ timeout = 1
 initial_position = [0.0, 0.543674, 0.458738] 
 initial_orientation = [1, 0, 0, 0]
 # Object recognition
-# initial_box_coords = [initial_position[0] + 0.0, initial_position[1] + 0.0, initial_position[2] - 0.25]
 initial_box_coords = [0, 0, 0.3] # in camera frame
 conf_thresh = 0.55
 dist_thresh = 55

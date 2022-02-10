@@ -3,6 +3,7 @@ computer_vision/scripts/checkpoints/segmentation_model_checkpoint.pth
 computer_vision/scripts/checkpoints/best_segm_mAP_epoch_15.pth
 computer_vision/scripts/checkpoints/temp.pth
 computer_vision/scripts/segmentation_dataset
+contact_graspnet/checkpoints/*
 **/__pycache__/*
 *.pyc
 *.vscode

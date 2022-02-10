@@ -8,14 +8,16 @@ from sensor_msgs.msg import Image, CameraInfo
 # from cv_bridge import CvBridge
 # import cv2 as cv
 import numpy as np
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 import tf
 
 from segmentation.srv import SegmentAndClassifyService, SegmentAndClassifyServiceRequest, SegmentAndClassifyServiceResponse
 from segmentation.msg import SegmentAndClassifyResult
-from contact_graspnet_planner.srv import ContactGraspNetAnswer
+from contact_graspnet_planner.srv import ContactGraspNetPlanner, ContactGraspNetPlannerRequest, ContactGraspNetPlannerResponse, ContactGraspNetAnswer
 from utils import ArrayToRos, QuaternionToArr, get_center_coordinates, get_points_with_vectors, get_points_with_vectors, get_poses_from_grasps, get_proj_point, get_rotation_by_vector, rosPose, PointToArr, get_list_of_poses
 from kuka_smach_control.srv import GoalPoses, GoalPosesRequest, GoalPosesResponse
+import copy as copy_module
+from cv_bridge import CvBridge
 
 
 
@@ -23,6 +25,8 @@ import config as cfg
 
 br = tf.TransformBroadcaster()
 np.set_printoptions(precision=2)
+# listener = tf.TransformListener()
+cv_brdg = CvBridge()
 
 def check_all_nodes():
 
@@ -71,7 +75,6 @@ def run_segmentation():
             srv_proxy = rospy.ServiceProxy(
                 'segmentation_inference_service', SegmentAndClassifyService)
             response = srv_proxy()
-
             return (response.results.masked_depth, response.results.mask, response.results.class_name, response.results.class_conf, response.results.class_dist)
         else:
             results = rospy.wait_for_message('/segm_results', SegmentAndClassifyResult)
@@ -81,9 +84,7 @@ def run_segmentation():
         return None
 
 
-def move(userdata):
-    grasping_poses = userdata.grasping_poses
-    class_index = userdata.class_name
+def moveToPose(grasping_poses, class_index):
     try:
         moveToPoint = rospy.ServiceProxy(
             '/GoalPoses', GoalPoses)
@@ -94,9 +95,7 @@ def move(userdata):
         request.Poses = get_poses_from_grasps(grasping_poses)
 
         print(f'Going to box: {request.GoalBoxIndex}')
-        print(request.Poses[0].position)
 
-        # rospy.logwarn(len)
         response = moveToPoint(request)
 
     except rospy.ServiceException as e:
@@ -109,27 +108,40 @@ def move(userdata):
         return 'Planning failed'
 
 
+def checkPosition(goal_position, goal_orientation, cur_pose=None, target_frame=None):
+    if cur_pose is target_frame is None:
+        raise f"Can't get current pose"
+
+    if cur_pose is None:
+        listener = tf.TransformListener()
+        listener.waitForTransform('world', target_frame, rospy.Time(0), rospy.Duration(secs=5))
+        (position,rot) = listener.lookupTransform('world', target_frame, rospy.Time(0))
+
+        cur_position = np.array(position)
+        cur_orientation = np.array(rot)
+    else:
+        cur_position = PointToArr(cur_pose.position)
+        cur_orientation = QuaternionToArr(cur_pose.orientation)
+
+    cur_orientation = np.absolute(cur_orientation) # workaround for handling negative quaternion near limits
+
+    positions_are_same = np.allclose(cur_position, goal_position, atol=1e-2)
+    orientations_are_same = np.allclose(cur_orientation, goal_orientation, atol=1e-2) or np.allclose(-cur_orientation, goal_orientation, atol=1e-2)
+
+    return positions_are_same and orientations_are_same
+
+
 def moveManipulatorToHome():
     # check if end-effector is already at initial position and move to this pose 
-    listener = tf.TransformListener()
-    listener.waitForTransform('world', 'iiwa_link_ee_grasp', rospy.Time(0), rospy.Duration(secs=5))
-    (trans,rot) = listener.lookupTransform('world', 'iiwa_link_ee_grasp', rospy.Time(0))
+    pose_achieved = checkPosition(np.array(cfg.initial_position), np.array(cfg.initial_orientation), target_frame='iiwa_link_ee_grasp')
 
-    trans = np.array(trans)
-    rot = np.array(rot)
-
-    rot = np.absolute(rot) # handle 
-
-    translation_is_init = np.allclose(trans, np.array(cfg.initial_position), atol=1e-2)
-    rotation_is_init = np.allclose(rot, np.array(cfg.initial_orientation), atol=1e-2) or np.allclose(-rot, np.array(cfg.initial_orientation), atol=1e-2)
-
-    if translation_is_init and rotation_is_init:
+    if pose_achieved:
         rospy.loginfo('Already at initial pose!')
         return True
     else:
         try:
-            rospy.loginfo(f'current position: {trans}, current orientation quaternion: {rot}')
-            rospy.loginfo(f'current position: {np.array(cfg.initial_position)}, Init orientation quaternion: {np.array(cfg.initial_orientation)}')
+            # rospy.loginfo(f'current position: {trans}, current orientation quaternion: {rot}')
+            # rospy.loginfo(f'current position: {np.array(cfg.initial_position)}, Init orientation quaternion: {np.array(cfg.initial_orientation)}')
 
             moveToPoint = rospy.ServiceProxy(
                 '/GoalPoses', GoalPoses)
@@ -137,8 +149,6 @@ def moveManipulatorToHome():
             request.WorkingMode = 3
             request.Poses = [rosPose(cfg.initial_position, cfg.initial_orientation)]
             response = moveToPoint(request)
-            (trans,rot) = listener.lookupTransform('world', 'iiwa_link_ee_grasp', rospy.Time(0))
-            # rospy.logerr((trans, rot))
             return True
 
         except rospy.ServiceException as e:
@@ -148,19 +158,28 @@ def moveManipulatorToHome():
 
 def generate_grasps(mask):
 
-    rospy.wait_for_service('/response')
-    try:
-        srv_proxy = rospy.ServiceProxy(
-            '/response', ContactGraspNetAnswer)
-        response = srv_proxy(mask)
+    color_im = rospy.wait_for_message('/camera/color/image_raw', Image)
+    depth_im = rospy.wait_for_message(
+        '/camera/aligned_depth_to_color/image_raw', Image)
 
-        rospy.logwarn(f'Generated {len(response.grasps)} grasps')
 
-        return response if len(response.grasps) != 0 else None
-    except rospy.ServiceException as e:
-        rospy.logerr(e)
-        return None
+    camera_info_ros = rospy.wait_for_message(
+            '/camera/aligned_depth_to_color/camera_info', CameraInfo)
 
+    grasp_planner = rospy.ServiceProxy(
+        'grasp_planner', ContactGraspNetPlanner)
+
+
+    response = grasp_planner(
+        color_im,
+        depth_im,
+        camera_info_ros,
+        mask
+    )
+    rospy.loginfo("Get {} grasps from the server.".format(
+        len(response.grasps)))
+    
+    return response
 
 def changePosition(depth_masked, attempt):
 
@@ -200,10 +219,10 @@ def save_feature():
         rospy.logerr(f"Service call failed: {e}")
         return None
 
-def save_object(depth_masked):
+def save_object(mask):
     # 1. get grasp poses
 
-    grasping_poses = generate_grasps(depth_masked)
+    grasping_poses = generate_grasps(mask)
     # request.Poses = [a.pose for a in grasping_poses.grasps]
     if not grasping_poses:
         return 'Grasps not generated'
@@ -260,18 +279,15 @@ def save_object(depth_masked):
 
     end_train = rospy.ServiceProxy(
                 '/segmentation_end_train_service', Trigger)
-    end_train()
+    is_saved = end_train()
+    
     
     rospy.loginfo(f'Saved {saved_frames}/3 frames')
     rospy.loginfo('Going to grasp object')
-    # 4. got above object to detect it
+    # 4. go above object to detect it
 
     request = GoalPosesRequest()
-    # br.sendTransform(point,
-    #                 quat_array,
-    #                 rospy.Time.now(),
-    #                 'goal_pose',
-    #                 "world")
+
 
     point = cfg.plane_obj_coordinates.copy()
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -295,6 +311,9 @@ def save_object(depth_masked):
         saved_frames += 1
     except rospy.ServiceException as e:
         rospy.logerr(e)
+
+    if not is_saved:
+        return 'Object not saved'
 
     return 'Object saved' if saved_frames / cfg.learn_n_points  > 0.5 else 'Object not saved'
 

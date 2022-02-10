@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 
 import time
-import random
 from utils import AttemptCounter
 
 import smach
 import smach_ros
 import rospy
 
-from functions import check_all_nodes, run_segmentation, move, moveManipulatorToHome, generate_grasps, save_object, changePosition
+from ros_functions import check_all_nodes, run_segmentation, moveToPose, moveManipulatorToHome, generate_grasps, save_object, changePosition
 import config as cfg
 
 counter = AttemptCounter()
-
 
 class InitializeAll(smach.State):
     def __init__(self, outcomes=['All initialized', 'Not all initialized'],
@@ -42,7 +40,7 @@ class WaitForCommand(smach.State):
 
     def execute(self, userdata):
 
-        command = input('type ENTER to start')
+        # command = input('type ENTER to start')
         return 'Start working'
 
 
@@ -99,7 +97,7 @@ class PlanAndMove(smach.State):
         smach.State.__init__(self, outcomes=outcomes, input_keys=input_keys)
 
     def execute(self, userdata):
-        return_value = move(userdata)
+        return_value = moveToPose(userdata.grasping_poses, userdata.class_name)
         if return_value == 'Moving successful':
             counter.reset()
         return return_value
@@ -134,14 +132,14 @@ class ChangePosition(smach.State):
 
 class LearnNewObject(smach.State):
     def __init__(self, outcomes=['Object saved', 'Object not saved', 'Grasps not generated'],
-                 input_keys=['depth_masked'],
-                 output_keys=['depth_masked']):
+                 input_keys=['mask'],
+                 output_keys=['mask']):
         smach.State.__init__(self, outcomes=outcomes,
                              input_keys=input_keys, output_keys=output_keys)
 
     def execute(self, userdata):
 
-        ret = save_object(userdata.depth_masked)
+        ret = save_object(userdata.mask)
         if ret == 'Object saved':
             counter.reset()
         return ret
@@ -149,7 +147,7 @@ class LearnNewObject(smach.State):
 
 if __name__ == '__main__':
 
-    rospy.init_node('blablabla')
+    rospy.init_node('state_machine')
 
     sm = smach.StateMachine(outcomes=['Stopped'])
 
@@ -183,7 +181,6 @@ if __name__ == '__main__':
         smach.StateMachine.add('PLAN AND MOVE', PlanAndMove(),
                                transitions={
             'Planning failed': 'CHANGE POSITION',
-            'Moving sucessful': 'RECOGNIZE OBJECTS',
             'Moving sucessful': 'GO TO INITIAL STATE'
         })
 
@@ -197,8 +194,7 @@ if __name__ == '__main__':
                                transitions={
             'Position changed': 'RECOGNIZE OBJECTS',
             'Too many attempts': 'GO TO INITIAL STATE',
-            # 'Moving failed': 'Stopped'
-            'Moving failed': 'RECOGNIZE OBJECTS'
+            'Moving failed': 'Stopped'
         })
 
         smach.StateMachine.add('LEARN OBJECT', LearnNewObject(),
@@ -208,11 +204,7 @@ if __name__ == '__main__':
             'Grasps not generated': 'CHANGE POSITION'
         })
 
-    # sis = smach_ros.IntrospectionServer('server_name', sm, '/SM_ROOT')
-    # sis.start()
 
     outcome = sm.execute()
 
-    # rospy.spin()
 
-    # sis.stop()

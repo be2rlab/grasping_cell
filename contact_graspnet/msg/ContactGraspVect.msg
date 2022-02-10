@@ -1,1 +1,0 @@
-ContactGrasp[] grasps_vect
