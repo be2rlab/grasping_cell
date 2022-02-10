@@ -1,5 +1,6 @@
+#!/usr/bin/env python3
+
 #!/home/server3090/anaconda3/envs/tf-gpu-example/bin/python
-#!/usr/bin/python3
 
 import os
 import sys
@@ -92,6 +93,7 @@ class ImageListener:
         masked_msg = request.mask
         masked_im = copy_module.deepcopy(
             self.cv_brdg.imgmsg_to_cv2(masked_msg, desired_encoding='8UC1'))
+            
         masked_im[masked_im > 0] = 1
 
         segmask = self.cv_brdg.cv2_to_imgmsg(masked_im)

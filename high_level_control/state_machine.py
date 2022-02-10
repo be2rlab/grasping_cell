@@ -26,9 +26,10 @@ class InitializeAll(smach.State):
             return 'Not all initialized'
 
         rospy.logwarn('Go to initial position')
-        return_value = moveManipulatorToHome()
+        # return_value = moveManipulatorToHome()
 
-        return 'All initialized' if ret and return_value else 'Not all initialized'
+        # return 'All initialized' if ret and return_value else 'Not all initialized'
+        return 'All initialized' if ret else 'Not all initialized'
 
 
 class WaitForCommand(smach.State):
@@ -39,7 +40,7 @@ class WaitForCommand(smach.State):
 
     def execute(self, userdata):
 
-        command = input('type ENTER to start')
+        # command = input('type ENTER to start')
         return 'Start working'
 
 
@@ -131,14 +132,14 @@ class ChangePosition(smach.State):
 
 class LearnNewObject(smach.State):
     def __init__(self, outcomes=['Object saved', 'Object not saved', 'Grasps not generated'],
-                 input_keys=['depth_masked'],
-                 output_keys=['depth_masked']):
+                 input_keys=['mask'],
+                 output_keys=['mask']):
         smach.State.__init__(self, outcomes=outcomes,
                              input_keys=input_keys, output_keys=output_keys)
 
     def execute(self, userdata):
 
-        ret = save_object(userdata.depth_masked)
+        ret = save_object(userdata.mask)
         if ret == 'Object saved':
             counter.reset()
         return ret

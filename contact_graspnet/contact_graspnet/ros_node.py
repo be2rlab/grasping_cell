@@ -25,7 +25,7 @@ from sensor_msgs.msg import Image
 from contact_graspnet_planner.msg import ContactGrasp
 from contact_graspnet_planner.srv import ContactGraspNetPlanner
 from contact_graspnet_planner.srv import ContactGraspNetPlannerResponse
-
+from visualization_utils import visualize_grasps
 
 def imgmsg_to_cv2(img_msg):
     """Convert ROS Image messages to OpenCV images.
@@ -115,6 +115,13 @@ class GraspPlannerServer(object):
         rospy.Service("grasp_planner", ContactGraspNetPlanner, self.plan_grasp_handler)
         rospy.loginfo("Start Contact-GraspNet grasp planner.")
 
+
+        self.pc_full = None
+        self.pred_grasps_cam = None
+        self.scores = None
+        self.pc_colors = None
+        self.flag = None
+
     def plan_grasp_handler(self, req):
         #############
         # Get Input #
@@ -166,7 +173,7 @@ class GraspPlannerServer(object):
 
         # Generate grasp
         start_time = time.time()
-        rospy.loginfo('Start to genterate grasps')
+        rospy.loginfo('Start to generate grasps')
         pred_grasps_cam, scores, contact_pts, _ = self.grasp_estimator.predict_scene_grasps(
             self.sess,
             pc_full,
@@ -184,6 +191,13 @@ class GraspPlannerServer(object):
                 grasp_msg = self.get_grasp_msg(instance_id, grasp, score, contact_pt)
                 grasp_resp.grasps.append(grasp_msg)
         rospy.loginfo('Generate grasp {} took {}s'.format(len(grasp_resp.grasps), time.time() - start_time))
+
+        # save for visualizing
+        self.pc_full = pc_full
+        self.pred_grasps_cam = pred_grasps_cam
+        self.scores = scores
+        self.pc_colors = pc_colors
+        self.flag = True
 
         return grasp_resp
 
@@ -298,7 +312,7 @@ if __name__ == "__main__":
     rospy.loginfo('pid: %s' % (str(os.getpid())))
 
     # start Contact GraspNet Planner service
-    GraspPlannerServer(
+    planner = GraspPlannerServer(
         global_config,
         ckpt_dir,
         local_regions=local_regions,
@@ -307,4 +321,13 @@ if __name__ == "__main__":
         segmap_id=segmap_id,
         z_range=z_range,
         forward_passes=forward_passes)
+
+
+    while not rospy.is_shutdown():
+        if planner.flag == True:
+            visualize_grasps(planner.pc_full, planner.pred_grasps_cam,
+                             planner.scores, plot_opencv_cam=True, pc_colors=planner.pc_colors)
+
+            planner.flag = False
+
     rospy.spin()
