@@ -2,7 +2,7 @@
     <include file="$(find contact_graspnet_planner)/launch/grasp_planner.launch">
         <arg name="filter_grasps" value="True"/>
         <arg name="z_min" value="0.05"/>
-        <arg name="z_max" value="0.55"/>
+        <arg name="z_max" value="0.60"/>
         <arg name="skip_border_objects" value="True"/>
         <arg name="forward_passes" value="10"/>
         <arg name="local_regions" value="True"/>

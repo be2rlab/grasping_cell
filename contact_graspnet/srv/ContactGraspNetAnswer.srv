@@ -1,4 +1,4 @@
-sensor_msgs/Image depth_masked
+sensor_msgs/Image mask
 ---
 # response params
 bool success

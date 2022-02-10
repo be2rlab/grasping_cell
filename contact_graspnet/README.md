@@ -41,12 +41,6 @@ Test data
 
 Download the test data from https://drive.google.com/drive/folders/1v0_QMTUIEOcu09Int5V6N2Nuq7UCtuAA and copy them them into the test_data/ folder.
 
-# Using 
-
-1. activate conda environment ``` conda activate tf-gpu-example```
-2. run nodes ```roslaunch contact_graspnet generate_grasps.launch```
-
-
 ## 3. ROS Server Interface
 ### 3.1 grasp_planner ([ContactGraspNetPlanner](./srv/ContactGraspNetPlanner.srv))
 #### 3.1.1 Service Request Messages
@@ -88,3 +82,37 @@ Download the test data from https://drive.google.com/drive/folders/1v0_QMTUIEOcu
 * segmap_id (int)
     * Only return grasps of the given object id
     * Default: 0
+
+## 4. Launch ROS node
+### 4.1 How to use my_node.py
+
+Start Grasp Planner Server Node
+```
+roslaunch contact_graspnet_planner grasp_planner.launch
+```
+Change path to global_config in [253 line](https://github.com/deyakovleva/contact_graspnet/blob/98414515eca649a3ddb07a22f375ce0e51f4dda4/contact_graspnet/my_node.py#L253) in my_node.py. Start my_node.py
+```
+cd contact_graspnet/
+python3 my_node.py
+```
+In [line 210](https://github.com/deyakovleva/contact_graspnet/blob/98414515eca649a3ddb07a22f375ce0e51f4dda4/contact_graspnet/my_node.py#L210) the argument can be changed (depth_ros - for full depth image and depth_crp_ros - for cropped depth image)
+
+Start rviz with aligned_depth_to_color
+```
+roslaunch realsense2_camera rs_aligned_depth.launch
+```
+Call service for grasps generation 
+```
+rosservice call /responce "{}"
+```
+Topic /answer prints 5 grasps position, orientation, scores (ascending), contact_points, id. The amount of grasps can be changed in [line 334](https://github.com/deyakovleva/contact_graspnet/blob/98414515eca649a3ddb07a22f375ce0e51f4dda4/contact_graspnet/my_node.py#L334).
+## Citation
+
+```
+@article{sundermeyer2021contact,
+  title={Contact-GraspNet: Efficient 6-DoF Grasp Generation in Cluttered Scenes},
+  author={Sundermeyer, Martin and Mousavian, Arsalan and Triebel, Rudolph and Fox, Dieter},
+  booktitle={2021 IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2021}
+}
+```
