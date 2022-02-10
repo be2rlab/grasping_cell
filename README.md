@@ -115,7 +115,7 @@ Each step is recommended to be executed in separated terminal windows to monitor
 
   a. In simulation (rviz):
 ```bash
-roslaunch iiwa_moveit move_group.launch
+roslaunch iiwa_moveit demo.launch
 ```
   b. Or for execution in Gazebo:
 ```
