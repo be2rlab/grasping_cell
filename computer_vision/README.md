@@ -19,6 +19,8 @@ This project was tested with:
 ## Environment setup with Anaconda
 1. Create anaconda environment: ```conda env create -n conda_environment.yml```
 2. ```conda activate segmentation_ros```
+3. Install MMdet ```pip install mim; mim install mmdet```
+4. (Optionally) install Detectron2
 
 ## Environment setup with Docker
 
