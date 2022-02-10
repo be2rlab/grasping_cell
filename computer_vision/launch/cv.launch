@@ -1,0 +1,4 @@
+<launch>
+    <param name="node_type" type="str" value="topic" />
+    <node name="CV_node" type="segmentation_node.py" pkg="computer_vision" output="screen"/>
+</launch>

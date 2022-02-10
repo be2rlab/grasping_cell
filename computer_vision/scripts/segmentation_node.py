@@ -15,8 +15,8 @@ from std_srvs.srv import Trigger, TriggerResponse
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 
-from segmentation.msg import SegmentAndClassifyResult
-from segmentation.srv import SegmentAndClassifyService, SegmentAndClassifyServiceResponse
+from computer_vision.msg import SegmentAndClassifyResult
+from computer_vision.srv import SegmentAndClassifyService, SegmentAndClassifyServiceResponse
 
 from models.all_model import AllModel
 from utilities.utils import draw_masks, get_nearest_mask_id, get_ros_result

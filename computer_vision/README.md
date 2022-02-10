@@ -31,7 +31,7 @@ This project was tested with:
 
 ## Using
 Run node:
-```roslaunch segmentation segmentation_node.launch```
+```roslaunch computer_vision cv.launch```
 
 By default, it runs publisher. Optionally you can pass an argument mode:=service to run in service mode.
 Along with inference mode, this node has training mode to save new objects in classifier.
