@@ -123,7 +123,7 @@ roslaunch iiwa_moveit moveit_planning_execution.launch sim:=true
 ```
   c. Or if we are connecting to a Real Robot, we use:
 ```
-roslaunch iiwa_moveit moveit_planning_execution.launch sim:=true
+roslaunch iiwa_moveit moveit_planning_execution.launch sim:=false
 ```
   d. Start the pick and place node:
 ```
