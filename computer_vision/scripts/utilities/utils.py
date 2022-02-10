@@ -20,9 +20,8 @@ def get_ros_result(masks, depth_cropped, cl_names, cl_confs, cl_dists, nearest_m
     results = SegmentAndClassifyResult()
     results.header = Header()
     results.header.stamp = rospy.get_rostime()
-
     results.mask = bridge.cv2_to_imgmsg(
-        masks[nearest_mask].astype(np.uint8), encoding='mono8')
+        masks[nearest_mask].astype(np.uint8), encoding='8UC1')
 
     results.masked_depth = bridge.cv2_to_imgmsg(
         depth_cropped.astype(np.uint16), encoding='16UC1')

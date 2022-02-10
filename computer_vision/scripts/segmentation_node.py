@@ -86,7 +86,8 @@ class VisionNode:
         self.model = AllModel(
             dataset_save_folder=f'{script_dir}/segmentation_dataset',
             segm_config=f'{script_dir}/checkpoints/SOLO_complete_config.py',
-            segm_checkpoint=f'{script_dir}/checkpoints/best_segm_mAP_epoch_15.pth',
+            # segm_checkpoint=f'{script_dir}/checkpoints/best_segm_mAP_epoch_15.pth',
+            segm_checkpoint=f'/home/server3090/Nenakhov/ocid/ocid_SOLO/best_segm_mAP_epoch_15.pth',
             segm_conf_thresh=0.8,
             n_augmented_crops=20,
             fe=torch.hub.load(

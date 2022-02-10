@@ -37,8 +37,6 @@ class MMDetWrapper:
 
             tmp_im = tmp_im[box[1]: box[3], box[0]:box[2]]
 
-            # plt.imshow(tmp_im)
-            # plt.show()
             mask = cv.morphologyEx(mask.astype(np.uint8), cv.MORPH_ERODE, np.ones(
                 (3, 3), np.uint8)).astype(np.uint8)
             masks.append(mask)
