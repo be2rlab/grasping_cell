@@ -9,4 +9,4 @@ This folder contains finite state machine control algorithm implemented with Sma
 
 # Graph of states
 
-![alt text](state_machine.png "Smach visualization")
+![alt text](visualization_of_state_machine.png "Smach visualization")

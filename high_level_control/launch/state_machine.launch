@@ -1,0 +1,3 @@
+<launch>
+    <node name="control_node" type="state_machine.py" pkg="high_level_control"/>
+</launch>
