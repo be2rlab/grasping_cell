@@ -223,6 +223,17 @@ def get_list_of_poses(obj_position_in_camera_frame, shift=0.05, camera_frame='ii
         
     return poses
 
+def check_service(fail_return_value):
+    def check_service_with_value(function):
+        def wrapper(*args, **kwargs):
+            try: 
+                
+                return function(*args, **kwargs)
+            except rospy.ROSException:
+                return fail_return_value
+        return wrapper
+    return check_service_with_value
+
 
 if __name__ == '__main__':
 

@@ -1,15 +1,13 @@
-import faiss
-import pandas as pd
+import os
 
+import pandas as pd
 import numpy as np
 import torch
-import os
 from scipy import stats as s
-from sklearn.linear_model import SGDOneClassSVM
-from sklearn.neighbors import LocalOutlierFactor
 
+import faiss
 
-class knn:
+class faiss_knn:
     def __init__(self, knn_file=None, savefile=None, knn_size=10, save_to_file=True, pca_ckpt=None, **kwargs):
 
         self.knn_size = knn_size

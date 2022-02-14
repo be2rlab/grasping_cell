@@ -1,19 +1,16 @@
-import pandas as pd
+import os
 
+import pandas as pd
 import numpy as np
 import torch
-import os
-from scipy import stats as s
-from scipy.spatial.distance import cdist
-from sklearn.linear_model import LogisticRegression
+
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import LabelEncoder
 from sklearn.neighbors import LocalOutlierFactor
-from sklearn.linear_model import SGDOneClassSVM
 
 
-class classifier:
-    def __init__(self, knn_file=None, savefile=None, save_to_file=True, **kwargs):
+class SKLearnClassifierWrapper:
+    def __init__(self, knn_file=None, savefile=None, save_to_file=True, model=None, **kwargs):
 
         self.x_data = None
         self.y_data = None
@@ -21,9 +18,11 @@ class classifier:
         self.classes = []
 
         self.save_to_file = save_to_file
-
-        self.model = KNeighborsClassifier(
-            n_neighbors=10, weights='distance', metric='cosine', n_jobs=-1)
+        if not model:
+            self.model = KNeighborsClassifier(
+                n_neighbors=10, weights='distance', metric='cosine', n_jobs=-1)
+        else:
+            self.model = model
         self.le = LabelEncoder()
 
         # self.outlier_detector = SGDOneClassSVM(tol=1e-6)

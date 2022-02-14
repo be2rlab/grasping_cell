@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
 import time
-from utils import AttemptCounter
 
 import smach
 import smach_ros
 import rospy
 
-from ros_functions import check_all_nodes, run_segmentation, moveToPose, moveManipulatorToHome, generate_grasps, save_object, changePosition
+from ros_functions import check_all_nodes, run_object_recognition, \
+    moveObjectToBox, moveManipulatorToHome, generate_grasps, learn_object, changePosition
+from utils import AttemptCounter
 import config as cfg
 
 counter = AttemptCounter()
@@ -22,13 +23,15 @@ class InitializeAll(smach.State):
 
         ret = check_all_nodes()
 
+        ret = True
+
         if not ret:
             return 'Not all initialized'
 
         rospy.logwarn('Go to initial position')
         # return_value = moveManipulatorToHome()
 
-        # return 'All initialized' if ret and return_value else 'Not all initialized'
+        # return 'All initialized'
         return 'All initialized' if ret else 'Not all initialized'
 
 
@@ -45,7 +48,7 @@ class WaitForCommand(smach.State):
 
 
 class RecognizeObjects(smach.State):
-    def __init__(self, outcomes=['Object found', 'Object found with low confidence', 'No objects found'],
+    def __init__(self, outcomes=['Object found', 'Object found with low confidence', 'No objects found', 'CV not available'],
                  output_keys=['mask', 'depth_masked', 'class_name']):
         smach.State.__init__(self, outcomes=outcomes,
                              output_keys=output_keys)
@@ -53,23 +56,28 @@ class RecognizeObjects(smach.State):
     def execute(self, userdata):
 
         time.sleep(2)
-        userdata.depth_masked, mask, cl, confidence, dist = run_segmentation()
+        # userdata.depth_masked, mask, cl, confidence, dist = run_object_recognition()
+        result = run_object_recognition()
 
-        userdata.mask = mask
-        userdata.class_name = cl
-
-        if len(mask.data) == 0:
+        if result is None:
+            return 'CV not available'
+        elif len(result.mask.data) == 0:
             return 'No objects found'
-        # else:
-            # userdata.depth_masked, userdata.mask, cl, confidence, dist = ret
-        elif confidence > cfg.conf_thresh and dist < cfg.dist_thresh and cl != '':
+        elif result.class_conf > cfg.conf_thresh and result.class_dist < cfg.dist_thresh and result.class_name != '':
             print(
-                f'Found object: {cl} with confidence {confidence:.2f}, distance: {dist:.2f}')
-            return 'Object found'
+                f'Found object: {result.class_name} with confidence {result.class_conf:.2f}, distance: {result.class_dist:.2f}')
+            ret_val = 'Object found'
         else:
             print(
-                f'Found object of class {cl}, confidence: {confidence:.2f}, distance: {dist:.2f}')
-            return 'Object found with low confidence'
+                f'Found object of class {result.class_name}, confidence: {result.class_conf:.2f}, distance: {result.class_dist:.2f}')
+            ret_val = 'Object found with low confidence'
+            
+        userdata.class_name = result.class_name
+        userdata.mask = result.mask
+
+        return ret_val
+
+
 
 
 class GenerateGrasps(smach.State):
@@ -97,7 +105,7 @@ class PlanAndMove(smach.State):
         smach.State.__init__(self, outcomes=outcomes, input_keys=input_keys)
 
     def execute(self, userdata):
-        return_value = moveToPose(userdata.grasping_poses, userdata.class_name)
+        return_value = moveObjectToBox(userdata.grasping_poses, userdata.class_name)
         if return_value == 'Moving successful':
             counter.reset()
         return return_value
@@ -139,7 +147,7 @@ class LearnNewObject(smach.State):
 
     def execute(self, userdata):
 
-        ret = save_object(userdata.mask)
+        ret = learn_object(userdata.mask)
         if ret == 'Object saved':
             counter.reset()
         return ret
@@ -170,6 +178,7 @@ if __name__ == '__main__':
             'Object found': 'GENERATE GRASPS',
             'Object found with low confidence': 'LEARN OBJECT',
             'No objects found': 'CHANGE POSITION',
+            'CV not available': 'INITIALIZATION'
         })
 
         smach.StateMachine.add('GENERATE GRASPS', GenerateGrasps(),

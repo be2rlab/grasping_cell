@@ -9,12 +9,8 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
 # local packages
-from models.faiss_knn import knn
-from models.classifier import classifier
-# from models.detectron2_wrapper import Detectron2Wrapper
-from models.mmdet_wrapper import MMDetWrapper
 
-
+from models import MMDetWrapper, SKLearnClassifierWrapper
 from utilities.utils import get_nearest_mask_id
 
 
@@ -25,7 +21,6 @@ class AllModel:
         self.fe_fp16 = fe_fp16
         self.n_augmented_crops = n_augmented_crops
 
-        script_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.dataset_save_folder = dataset_save_folder
 
@@ -47,7 +42,7 @@ class AllModel:
         self.fe.to(self.device)
 
         # self.classifier = knn(**kwargs)
-        self.classifier = classifier(**kwargs)
+        self.classifier = SKLearnClassifierWrapper(**kwargs)
 
         # check if saved knn file has same dimensionality as feature extractor
         if self.classifier.x_data is not None:
@@ -135,6 +130,10 @@ class AllModel:
         return 'features saved'
 
     def add_to_knn(self):
+
+        if len(self.features_to_save) == 0:
+            print('No saved tensors')
+            return False
         feats = np.stack(self.features_to_save)
 
         self.classes.append(f'{len(self.classifier.classes) + 1}')

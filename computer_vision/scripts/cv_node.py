@@ -23,7 +23,6 @@ from utilities.utils import draw_masks, get_nearest_mask_id, get_ros_result
 
 warnings.filterwarnings('ignore')
 
-
 lock = threading.Lock()
 
 
@@ -51,7 +50,7 @@ class VisionNode:
 
             rospy.logwarn('Publisher is setting up')
             self.results_pub = rospy.Publisher(
-                '/segm_results', SegmentAndClassifyResult, queue_size=10)
+                '/cv_results', SegmentAndClassifyResult, queue_size=10)
 
             self.cropped_depth_pub = rospy.Publisher(
                 '/depth_masked', Image, queue_size=10)
@@ -68,7 +67,7 @@ class VisionNode:
 
         elif self.type == 'service':
             self.inference_srv = rospy.Service(
-                'segmentation_inference_service', SegmentAndClassifyService, self.service_inference_callback)
+                'cv_inference_service', SegmentAndClassifyService, self.service_inference_callback)
             rospy.logwarn('Service is setting up')
 
             self.im = None
@@ -76,15 +75,15 @@ class VisionNode:
             self.rgb_msg_header = None
 
         self.train_srv = rospy.Service(
-            'segmentation_train_service', Trigger, self.service_train_callback)
+            'cv_train_service', Trigger, self.service_train_callback)
 
         self.end_train_srv = rospy.Service(
-            'segmentation_end_train_service', Trigger, self.service_end_training_callback)
+            'cv_end_train_service', Trigger, self.service_end_training_callback)
 
         script_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.model = AllModel(
-            dataset_save_folder=f'{script_dir}/segmentation_dataset',
+            dataset_save_folder=f'{script_dir}/cropped_iamges_dataset',
             segm_config=f'{script_dir}/checkpoints/SOLO_complete_config.py',
             segm_checkpoint=f'{script_dir}/checkpoints/best_segm_mAP_epoch_15.pth',
             segm_conf_thresh=0.8,

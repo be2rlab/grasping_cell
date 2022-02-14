@@ -1,39 +1,32 @@
-from time import time
-from pandas import Timedelta, TimedeltaIndex
-import rospy
-from std_srvs.srv import Trigger, TriggerResponse
-from geometry_msgs.msg import Pose, Point, Quaternion
-from sensor_msgs.msg import Image, CameraInfo
-# import open3d as o3d
-# from cv_bridge import CvBridge
-# import cv2 as cv
 import numpy as np
-from matplotlib import pyplot as plt
+
+import rospy
+from std_srvs.srv import Trigger
+from sensor_msgs.msg import Image, CameraInfo
 import tf
 
-from segmentation.srv import SegmentAndClassifyService, SegmentAndClassifyServiceRequest, SegmentAndClassifyServiceResponse
-from segmentation.msg import SegmentAndClassifyResult
-from contact_graspnet_planner.srv import ContactGraspNetPlanner, ContactGraspNetPlannerRequest, ContactGraspNetPlannerResponse, ContactGraspNetAnswer
-from utils import ArrayToRos, QuaternionToArr, get_center_coordinates, get_points_with_vectors, get_points_with_vectors, get_poses_from_grasps, get_proj_point, get_rotation_by_vector, rosPose, PointToArr, get_list_of_poses
-from kuka_smach_control.srv import GoalPoses, GoalPosesRequest, GoalPosesResponse
-import copy as copy_module
-from cv_bridge import CvBridge
 
-
+from computer_vision.srv import SegmentAndClassifyService
+from computer_vision.msg import SegmentAndClassifyResult
+from contact_graspnet_planner.srv import ContactGraspNetPlanner
+from utils import QuaternionToArr, get_center_coordinates, get_points_with_vectors, \
+    get_points_with_vectors, get_poses_from_grasps, \
+        get_rotation_by_vector, rosPose, PointToArr, get_list_of_poses, check_service
+from high_level_control.srv import GoalPoses, GoalPosesRequest
 
 import config as cfg
 
 br = tf.TransformBroadcaster()
 np.set_printoptions(precision=2)
 # listener = tf.TransformListener()
-cv_brdg = CvBridge()
+
 
 def check_all_nodes():
 
     rospy.logwarn('Checking nodes:')
     service_list = ['/iiwa/check_state_validity', 
-    #'/segmentation_inference_service',
-                    '/segmentation_train_service', '/GoalPoses', '/response', '/gripper_state']
+    '/cv_inference_service',
+                    '/cv_train_service', '/GoalPoses', '/grasp_planner', '/gripper_state']
     success = True
     for service in service_list:
         try:
@@ -45,7 +38,7 @@ def check_all_nodes():
 
     rospy.logwarn("")
     rospy.logwarn("Checking topics:")
-    topic_list = ['/camera/color/image_raw', '/camera/aligned_depth_to_color/image_raw', '/camera/color/camera_info', '/segm_results']
+    topic_list = ['/camera/color/image_raw', '/camera/aligned_depth_to_color/image_raw', '/camera/color/camera_info', '/cv_results']
     type_list = [Image, Image, CameraInfo, SegmentAndClassifyResult]
 
     for topic, t in zip(topic_list,type_list):
@@ -56,35 +49,30 @@ def check_all_nodes():
         except rospy.ROSException as e:
             rospy.logerr(f'{topic} [NOT OK]')
             success = False
-    # if not success:
-    #     success = False
-    return True
+
+    return success
 
 
-
-def run_segmentation():
-    service_is_available = True
+@check_service(fail_return_value=None)
+def run_object_recognition():
+    # check if service is available. If Not, use topic 
     try:
-        rospy.wait_for_service('segmentation_inference_service', timeout=cfg.timeout)
-    except rospy.ROSException as e:
-        service_is_available = False
-        rospy.logwarn('segmentation_inference_service not available, taking results from topic')
-
-    try:
-        if service_is_available:
-            srv_proxy = rospy.ServiceProxy(
-                'segmentation_inference_service', SegmentAndClassifyService)
-            response = srv_proxy()
-            return (response.results.masked_depth, response.results.mask, response.results.class_name, response.results.class_conf, response.results.class_dist)
-        else:
-            results = rospy.wait_for_message('/segm_results', SegmentAndClassifyResult)
-            return (results.masked_depth, results.mask, results.class_name, results.class_conf, results.class_dist)
+        srv_proxy = rospy.ServiceProxy(
+            'cv_inference_service', SegmentAndClassifyService)
+        response = srv_proxy()
+        return response.results
+        # return (response.results.masked_depth, response.results.mask, response.results.class_name, response.results.class_conf, response.results.class_dist)         
     except rospy.ServiceException as e:
-        rospy.logerr(f"Service call failed: {e}")
-        return None
+        rospy.logwarn("CV service is not available, trying to get result from topic")
+        
+        results = rospy.wait_for_message('/cv_results', SegmentAndClassifyResult, timeout=5)
+        return results
+                 
 
 
-def moveToPose(grasping_poses, class_index):
+@check_service(fail_return_value=None)
+def moveObjectToBox(grasping_poses, class_index):
+    
     try:
         moveToPoint = rospy.ServiceProxy(
             '/GoalPoses', GoalPoses)
@@ -109,6 +97,8 @@ def moveToPose(grasping_poses, class_index):
 
 
 def checkPosition(goal_position, goal_orientation, cur_pose=None, target_frame=None):
+
+    # Check if goal pose is the same as the current pose. Requires current pose or target_frame name (to obtain current pose from ros transforms)
     if cur_pose is target_frame is None:
         raise f"Can't get current pose"
 
@@ -130,7 +120,7 @@ def checkPosition(goal_position, goal_orientation, cur_pose=None, target_frame=N
 
     return positions_are_same and orientations_are_same
 
-
+@check_service(fail_return_value=None)
 def moveManipulatorToHome():
     # check if end-effector is already at initial position and move to this pose 
     pose_achieved = checkPosition(np.array(cfg.initial_position), np.array(cfg.initial_orientation), target_frame='iiwa_link_ee_grasp')
@@ -157,12 +147,10 @@ def moveManipulatorToHome():
 
 
 def generate_grasps(mask):
-
+    # combine mask of desired object obtained from CV module and raw realsense RGB and D images
     color_im = rospy.wait_for_message('/camera/color/image_raw', Image)
     depth_im = rospy.wait_for_message(
         '/camera/aligned_depth_to_color/image_raw', Image)
-
-
     camera_info_ros = rospy.wait_for_message(
             '/camera/aligned_depth_to_color/camera_info', CameraInfo)
 
@@ -181,12 +169,12 @@ def generate_grasps(mask):
     
     return response
 
+@check_service(fail_return_value='Module not available')
 def changePosition(depth_masked, attempt):
-
+    # in case of failure change position few times according to found objects
     if attempt == 0:
         changePosition.poses = get_list_of_poses(PointToArr(get_center_coordinates(depth_masked)), shift=cfg.change_position_shift)
 
-    # point = get_center_coordinates(depth_masked)
     pose = rosPose(*changePosition.poses[attempt])
 
     try:
@@ -207,11 +195,13 @@ def changePosition(depth_masked, attempt):
         rospy.logerr(e)
         return 'Moving failed'
         
+@check_service(fail_return_value=None)
+def save_frame():
 
-def save_feature():
+    # call service for saving the nearest found object
     try:
         srv_proxy = rospy.ServiceProxy(
-            'segmentation_train_service', Trigger)
+            'cv_train_service', Trigger)
         response = srv_proxy()
 
         return response
@@ -219,14 +209,13 @@ def save_feature():
         rospy.logerr(f"Service call failed: {e}")
         return None
 
-def save_object(mask):
+def learn_object(mask):
     # 1. get grasp poses
-
     grasping_poses = generate_grasps(mask)
     # request.Poses = [a.pose for a in grasping_poses.grasps]
     if not grasping_poses:
         return 'Grasps not generated'
-    # 1. Move object to a plane
+    # 2. Move object to a plane
     try:
         moveToPoint = rospy.ServiceProxy(
             '/GoalPoses', GoalPoses)
@@ -237,15 +226,17 @@ def save_object(mask):
         response = moveToPoint(request)
     except rospy.ServiceException as e:
         rospy.logerr(e)
-    # 2. Generate N positions
+    # 3. Generate N positions
     points, vectors = get_points_with_vectors(cfg.plane_obj_coordinates, cfg.learn_n_points)
 
-    # 3. Move and save frames
+    # 4. Move and save frames
 
     saved_frames = 0
 
-    for idx, (point, vector) in enumerate(zip(points[[0, 3, 4]], vectors[[0, 3, 4]])):
-        rospy.loginfo(f'moving to point {idx+1}/3')
+    points_to_keep_idxs = [0, 3, 4] # workaround
+
+    for idx, (point, vector) in enumerate(zip(points[points_to_keep_idxs], vectors[points_to_keep_idxs])):
+        rospy.loginfo(f'moving to point {idx+1}/{len(points_to_keep_idxs)}')
         print(point)
         request = GoalPosesRequest()
 
@@ -270,7 +261,7 @@ def save_object(mask):
             rospy.sleep(2)
             if response.AllMotionWorked:
                 rospy.loginfo(f'saving features')
-                save_feature()
+                save_frame()
                 saved_frames += 1
             # return 'Object saved'
         except rospy.ServiceException as e:
@@ -278,11 +269,11 @@ def save_object(mask):
             # return 'Object not saved'
 
     end_train = rospy.ServiceProxy(
-                '/segmentation_end_train_service', Trigger)
+                '/cv_end_train_service', Trigger)
     is_saved = end_train()
     
     
-    rospy.loginfo(f'Saved {saved_frames}/3 frames')
+    rospy.loginfo(f'Saved {saved_frames}/{len(points_to_keep_idxs)} frames')
     rospy.loginfo('Going to grasp object')
     # 4. go above object to detect it
 
@@ -319,7 +310,6 @@ def save_object(mask):
 
 
 if __name__ == '__main__':
-    # response = run_segmentation_srv()
 
     # generate_grasps(1)
     rospy.init_node("functions", log_level=rospy.INFO)
